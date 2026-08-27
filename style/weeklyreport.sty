@@ -1,0 +1,81 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{weeklyreport}[2026/08/27 Custom Weekly Report Style for DACN]
+
+%------------------------ Encoding & Fonts -----------------------------
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[utf8]{inputenc}
+  % T5 = Vietnamese font encoding (vntex package). Falls back to T1 if unavailable.
+  \IfFileExists{t5enc.def}{\RequirePackage[T5]{fontenc}}{\RequirePackage[T1]{fontenc}}
+  \IfFileExists{lmodern.sty}{\RequirePackage{lmodern}}{}
+\else
+  \RequirePackage{fontspec}
+  \setmainfont{Latin Modern Roman}
+  \setsansfont{Latin Modern Sans}
+  \setmonofont{Latin Modern Mono}
+\fi
+\RequirePackage{microtype}
+
+%------------------------ Layout & Geometry ----------------------------
+\RequirePackage[a4paper,margin=2.3cm,top=2.6cm,bottom=2.4cm]{geometry}
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+\RequirePackage{titlesec}
+\RequirePackage{setspace}
+\setstretch{1.06}
+
+%------------------------ Content & Graphics ---------------------------
+\RequirePackage{graphicx}
+\RequirePackage{float}          % [H] = Pin figures/tables exactly in place
+\RequirePackage{subcaption}     % Side-by-side subfigures
+\RequirePackage{wrapfig}        % Wrap text around figures
+\RequirePackage{caption}
+\RequirePackage{booktabs}       % Academic 3-rule tables
+\RequirePackage{tabularx}
+\RequirePackage{longtable}
+\RequirePackage{multirow}
+\RequirePackage{array}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{enumitem}
+\RequirePackage{xcolor}
+\RequirePackage{listings}
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+%------------------------ Color Palette --------------------------------
+\definecolor{accent}{HTML}{2F6FBF}
+\definecolor{accentdark}{HTML}{1B4A85}
+\definecolor{ok}{HTML}{2E8B57}
+\definecolor{warn}{HTML}{C98A00}
+\definecolor{bad}{HTML}{C0392B}
+\definecolor{neutral}{HTML}{6C757D}
+\definecolor{rulegray}{HTML}{D5DAE0}
+
+\RequirePackage[colorlinks=true,allcolors=accentdark,pdfusetitle]{hyperref}
+
+%------------------------ Header & Footer ------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\color{neutral}\ProjectName}
+\fancyhead[R]{\small\color{neutral}Week \WeekNo/\TotalWeeks}
+\fancyfoot[C]{\small\color{neutral}\thepage\ / \pageref{LastPage}}
+
+%------------------------ Section Styling ------------------------------
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{accentdark}}{\thesection.}{0.6em}{}
+  [{\color{rulegray}\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{accentdark}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{16pt}{7pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+\captionsetup{font=small,labelfont={bf,color=accentdark},skip=6pt}
+\captionsetup[sub]{font=small}
+\setlist[itemize]{itemsep=2pt,topsep=3pt,parsep=0pt,leftmargin=1.3em}
+\setlist[enumerate]{itemsep=2pt,topsep=3pt,parsep=0pt,leftmargin=1.5em}

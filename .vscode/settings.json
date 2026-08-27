@@ -1,0 +1,69 @@
+{
+  // LaTeX Workshop compilation recipes
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk",
+      "tools": ["latexmk"]
+    },
+    {
+      "name": "pdflatex -> pdflatex (2 passes for cross-references & total pages)",
+      "tools": ["pdflatex", "pdflatex"]
+    },
+    {
+      "name": "xelatex",
+      "tools": ["xelatex"]
+    }
+  ],
+
+  // LaTeX compilation tool configurations
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-pdf",
+        "-outdir=%OUTDIR%",
+        "%DOC%"
+      ],
+      "env": {}
+    },
+    {
+      "name": "pdflatex",
+      "command": "pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    },
+    {
+      "name": "xelatex",
+      "command": "xelatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    }
+  ],
+
+  // Preview PDF in an adjacent tab in VS Code
+  "latex-workshop.view.pdf.viewer": "tab",
+
+  // Automatically clean auxiliary build files (.aux, .log, .fls, etc.) after compilation
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  "latex-workshop.latex.clean.subfolder.enabled": true,
+
+  // Root file detection strategy
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  
+  // Auto-build on file save
+  "latex-workshop.latex.autoBuild.run": "onSave"
+}

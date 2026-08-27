@@ -1,0 +1,163 @@
+%=======================================================================
+%  SNIPPET GALLERY & FORMATTING EXAMPLES
+%  Copy any snippet below into your weekly sections/03_results.tex as needed.
+%=======================================================================
+
+%-------------------------------------------------- 1. TikZ Diagram ----
+\subsection{System Architecture Diagram}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 9mm,
+  box/.style={draw=accent!60,fill=accent!7,rounded corners=2pt,
+              minimum height=9mm,minimum width=23mm,align=center,
+              font=\small,inner sep=3pt},
+  store/.style={box,fill=ok!8,draw=ok!55},
+  outbox/.style={box,fill=warn!10,draw=warn!60},
+  arr/.style={-{Stealth[length=2mm]},draw=neutral!80}]
+
+  \node[box] (src)   {Dataset\\stream};
+  \node[box,right=of src] (drift) {Drift\\injector};
+  \node[box,right=of drift] (algo) {Estimator};
+  \node[store,right=of algo] (met) {Metric\\registry};
+  \node[outbox,below=of met] (rep) {Report};
+
+  \draw[arr] (src) -- (drift);
+  \draw[arr] (drift) -- (algo);
+  \draw[arr] (algo) -- (met);
+  \draw[arr] (met) -- (rep);
+\end{tikzpicture}
+\caption{Proposed system pipeline.}
+\label{fig:pipeline_example}
+\end{figure}
+\takeaway{Component decoupling ensures reproducible benchmarking.}
+
+%-------------------------------------------------- 2. Single Figure ---
+\subsection{Single Figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{figure_name.png}
+\caption{Experiment visualization.}
+\label{fig:single_example}
+\end{figure}
+\takeaway{Summary of observations from the figure above.}
+
+%-------------------------------------------------- 3. Side-by-side Subfigures
+\subsection{Side-by-Side Subfigures}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.48\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{before.png}
+  \caption{Before treatment}
+  \label{fig:before_example}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.48\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{after.png}
+  \caption{After treatment}
+  \label{fig:after_example}
+\end{subfigure}
+\caption{Comparison before and after treatment.}
+\label{fig:compare_example}
+\end{figure}
+\takeaway{Key difference observed between the two conditions.}
+
+%-------------------------------------------------- 4. Figure Next to Table
+\subsection{Figure Next to a Table}
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.46\linewidth}
+  \centering
+  \vspace{0pt}
+  \includegraphics[width=\linewidth]{memory.png}
+  \captionof{figure}{Memory profile over time.}
+  \label{fig:mem_example}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.5\linewidth}
+  \vspace{0pt}
+  \centering
+  \captionof{table}{Peak resource usage.}
+  \label{tab:mem_example}
+  \small
+  \begin{tabular}{@{}lrr@{}}
+  \toprule
+  \textbf{Algorithm} & \textbf{Peak RAM} & \textbf{Throughput} \\
+  \midrule
+  Model A & 41\,MB & 12\,400 pts/s \\
+  Model B & 78\,MB &  6\,900 pts/s \\
+  \bottomrule
+  \end{tabular}
+\end{minipage}
+\end{figure}
+\takeaway{Comparison between memory footprint and execution speed.}
+
+%-------------------------------------------------- 5. Text Wrapped Around Figure
+\subsection{Text Wrapped Around Figure}
+\begin{wrapfigure}{r}{0.35\linewidth}
+  \vspace{-8pt}
+  \centering
+  \includegraphics[width=\linewidth]{thumbnail.png}
+  \caption{Radius growth.}
+  \label{fig:wrap_example}
+  \vspace{-6pt}
+\end{wrapfigure}
+Insert descriptive text here explaining the wrapped figure. Keep at least 4 to 5 lines
+of text next to a wrapped figure to ensure proper alignment.
+
+%-------------------------------------------------- 6. Full Results Table
+\subsection{Results Table}
+\begin{table}[H]
+\centering
+\caption{Benchmark results. Best values in \textbf{bold}.}
+\label{tab:results_example}
+\small
+\begin{tabular}{@{}l cc cc@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Dataset A}} & \multicolumn{2}{c}{\textbf{Dataset B}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Model} & Accuracy & F1-Score & Accuracy & F1-Score \\
+\midrule
+Baseline & 0.71 & 0.55 & 0.63 & 0.48 \\
+Ours     & \textbf{0.84} & \textbf{0.79} & \textbf{0.78} & \textbf{0.67} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\takeaway{Our method consistently outperforms the baseline across both datasets.}
+
+%-------------------------------------------------- 7. Bar Chart (PGFPlots)
+\subsection{Performance Bar Chart}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, width=0.86\linewidth, height=5.4cm,
+  bar width=11pt, enlarge x limits=0.28,
+  symbolic x coords={ModelA,ModelB,ModelC},
+  xtick=data, ymin=0, ymax=1.0,
+  ylabel={Score}, ylabel style={font=\small},
+  tick label style={font=\small},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=-1,
+                font=\small,draw=rulegray},
+  nodes near coords, every node near coord/.append style={font=\tiny},
+  grid=major, grid style={rulegray,dashed}]
+  \addplot[fill=accent!65,draw=accent!80] coordinates {(ModelA,0.71) (ModelB,0.64) (ModelC,0.85)};
+  \addplot[fill=ok!55,draw=ok!75] coordinates {(ModelA,0.55) (ModelB,0.49) (ModelC,0.78)};
+  \legend{Metric 1, Metric 2}
+\end{axis}
+\end{tikzpicture}
+\caption{Performance comparison across models.}
+\label{fig:chart_example}
+\end{figure}
+\takeaway{Model C achieves superior performance on both metrics.}
+
+%-------------------------------------------------- 8. Code Listing
+\subsection{Code Snippet}
+\begin{lstlisting}[style=py,caption={Evaluation loop implementation.},label={lst:code_example}]
+for batch in dataloader:
+    pred = model(batch)
+    loss = criterion(pred, batch.target)
+    loss.backward()
+    optimizer.step()
+\end{lstlisting}
+\takeaway{Brief explanation of key implementation details in the snippet above.}

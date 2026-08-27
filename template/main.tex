@@ -1,0 +1,47 @@
+%=======================================================================
+%  WEEKLY REPORT — LaTeX MAIN DOCUMENT
+%  Compile: latexmk -pdf main.tex   (or pdflatex twice)
+%=======================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+% 1. Load weekly configuration metadata
+\input{config.tex}
+
+% 2. Load shared styling and utility macros
+\usepackage{../style/weeklyreport}
+\input{../style/macros.tex}
+
+% 3. Graphics search paths (looks in week's figures/ first, then shared-assets)
+\graphicspath{{figures/}{../../shared-assets/figures/}{../shared-assets/figures/}}
+
+\begin{document}
+
+%------------------------ TITLE BLOCK ---------------------------------
+\begin{center}
+  {\LARGE\bfseries\color{accentdark} Weekly Report \#\WeekNo\par}
+  \vspace{3pt}
+  {\large \ProjectName\par}
+\end{center}
+\vspace{4pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\small}l >{\small}X >{\bfseries\small}l >{\small}X@{}}
+\toprule
+Contributor & \AuthorName            & Reporting period & \WeekRange \\
+Mentors     & \MentorName            & Phase            & \PhaseName \\
+Repository  & \evi{\RepoURL}{github.com/user/repo} & Report date & \today \\
+\bottomrule
+\end{tabularx}
+\vspace{6pt}
+
+%------------------------ REPORT SECTIONS -----------------------------
+\input{sections/01_summary.tex}
+\input{sections/02_completed.tex}
+\input{sections/03_results.tex}
+\input{sections/04_issues.tex}
+\input{sections/05_next_week.tex}
+\input{sections/06_references.tex}
+\input{sections/appendix.tex}
+
+\end{document}

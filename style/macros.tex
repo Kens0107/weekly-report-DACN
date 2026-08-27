@@ -1,0 +1,60 @@
+%------------------------ Utility Macros ------------------------------
+% Status pill badges: \badge{ok}{Done}, \badge{warn}{In progress}, ...
+\newcommand{\badge}[2]{{\setlength{\fboxsep}{2.6pt}%
+  \colorbox{#1!13}{\textcolor{#1!75!black}{\bfseries\footnotesize\MakeUppercase{#2}}}}}
+\newcommand{\Done}{\badge{ok}{Done}}
+\newcommand{\WIP}{\badge{warn}{In progress}}
+\newcommand{\Blocked}{\badge{bad}{Blocked}}
+\newcommand{\Planned}{\badge{neutral}{Planned}}
+
+% Visual progress bar: \pbar{60}
+\newcommand{\pbar}[1]{%
+  \begin{tikzpicture}[baseline=-0.7ex]
+    \fill[rulegray] (0,0) rectangle (1.7,0.2);
+    \fill[accent]   (0,0) rectangle ({#1*0.017},0.2);
+    \node[right,font=\scriptsize,text=black!70] at (1.78,0.1) {#1\%};
+  \end{tikzpicture}\hspace*{1.6em}}
+
+% Required takeaway statement under figures and tables
+\newcommand{\takeaway}[1]{\par\vspace{-2pt}%
+  \noindent{\small\itshape\color{black!72}\textbf{Takeaway.} #1}\par\vspace{6pt}}
+
+% Hyperlinked evidence reference
+\newcommand{\evi}[2]{\href{#1}{\texttt{\small #2}}}
+
+% Placeholder figure box — replace with \includegraphics when final image is ready
+\newcommand{\ph}[2][0.9\linewidth]{%
+  \begin{tikzpicture}
+    \node[draw=neutral!45,dashed,fill=neutral!7,rounded corners=2pt,
+          minimum width=#1,minimum height={0.52*#1},align=center,
+          inner sep=0pt,font=\ttfamily\small,text=neutral]{#2};
+  \end{tikzpicture}}
+
+% Callout box for issues and blockers
+\newtcolorbox{issuebox}[1]{enhanced,breakable,
+  colback=white,colframe=accent!40,boxrule=0.6pt,arc=2pt,
+  left=7pt,right=7pt,top=5pt,bottom=5pt,
+  fonttitle=\bfseries\small,coltitle=accentdark,colbacktitle=accent!8,
+  title={#1}}
+
+% Callout box for design notes and decisions
+\newtcolorbox{notebox}[1][Note]{enhanced,breakable,
+  colback=ok!4,colframe=ok!45,boxrule=0.6pt,arc=2pt,
+  fonttitle=\bfseries\small,coltitle=ok!70!black,colbacktitle=ok!10,title={#1}}
+
+% Centered / Right-aligned / Left-aligned tabularx column specifiers
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% Listings code styling for Python
+\lstdefinestyle{py}{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{accentdark}\bfseries,
+  commentstyle=\color{ok!70!black}\itshape,
+  stringstyle=\color{bad!80!black},
+  numbers=left,numberstyle=\tiny\color{neutral},numbersep=7pt,
+  backgroundcolor=\color{neutral!5},
+  frame=single,rulecolor=\color{rulegray},
+  breaklines=true,showstringspaces=false,
+  xleftmargin=16pt,framexleftmargin=16pt,language=Python}
