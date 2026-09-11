@@ -1,0 +1,31 @@
+%=======================================================================
+\section{Tóm tắt Tổng quan}
+%=======================================================================
+\begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
+                    itemsep=4pt,topsep=2pt]
+  \item[Mục tiêu -] Thiết lập framework chạy pipeline River, cài đặt bộ metrics đánh giá phân cụm luồng, triển khai nhóm thuật toán nền tảng, và xây dựng phương pháp luận tinh chỉnh siêu tham số benchmark khách quan.
+  \item[Trạng thái -] \Done\ \textbf{Vượt tiến độ}
+\end{description}
+
+\subsection*{Bảng Theo dõi Tiến độ (Kế hoạch Proposal vs. Thực tế triển khai)}
+
+\begin{table}[H]
+\centering
+\caption{So sánh kế hoạch đề ra trong Proposal và kết quả thực tế (Tuần 2 \& 3).}
+\label{tab:tracker_vi}
+\small
+\begin{tabularx}{\textwidth}{@{}l L L c c@{}}
+\toprule
+\textbf{Giai đoạn / Tuần} & \textbf{Kế hoạch Proposal} & \textbf{Thực tế triển khai (Tuần 2--3)} & \textbf{Trạng thái} & \textbf{Mức hoàn thành} \\
+\midrule
+P1.2 (Tuần 2) & Nghiên cứu River \& dựng môi trường dev & Cài đặt River, tìm hiểu và dựng framework chạy pipeline & \Done & \pbar{100} \\
+P2.1 (Tuần 3) & Xây dựng bộ metrics benchmark cốt lõi & Cài đặt đủ 9 metrics (ARI, NMI, AMI, Purity, RI, Silhouette, SSQ, DB, CH) & \Done & \pbar{100} \\
+P3.1 (Tuần 6--7) & Cài đặt nhóm thuật toán đầu tiên (làm sớm) & Implement 10 thuật toán (5 thuật toán nền tảng + 5 thuật toán mở rộng) & \Done & \pbar{100} \\
+Chiến lược & Thống nhất lộ trình triển khai & Ưu tiên thuật toán nền tảng có cơ sở lý thuyết và thí nghiệm chuẩn mực & \Done & \pbar{100} \\
+Phương pháp luận & Thiết kế quy trình benchmark & Nghiên cứu LODO~\cite{cerqueira2026framework} \& đề xuất giải pháp LODO có chủ đích với tham số tương đối~\cite{fan2020hyperparameter} & \Done & \pbar{100} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{Hạ tầng pipeline và các hàm đánh giá đã hoàn thiện đầy đủ. Tiến độ triển khai thuật toán và phương pháp luận benchmark đang đi trước kế hoạch ban đầu.}
+
+\noindent\textbf{Tổng thể:} Tuần 2--3/\TotalWeeks{} - vượt tiến độ.

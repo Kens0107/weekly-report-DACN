@@ -1,0 +1,140 @@
+%=======================================================================
+\section{Reproducing the SVStream Experiments}
+\label{sec:svstream_reproduction}
+%=======================================================================
+
+We reproduced the experimental study of SVStream~\cite{wang2013svstream} (Figures~3--18) with our River implementation and benchmark framework. This section summarises the setup, where the results agree with the paper, where they do not, and why.
+
+%-----------------------------------------------------------------------
+\subsection{Setup}
+\label{subsec:svstream_setup}
+%-----------------------------------------------------------------------
+
+\begin{table}[H]
+\centering
+\caption{Datasets: paper vs.\ reproduction.}
+\label{tab:dataset_specs}
+\small
+\begin{tabularx}{\textwidth}{@{}l L L@{}}
+\toprule
+\textbf{Dataset} & \textbf{Paper} & \textbf{Reproduction} \\
+\midrule
+Ring-Ball & 2,000 points, 2 overlapping classes & Re-created (data not released): ring $R=3$, ball $\sigma=0.39$ with a 5\% wider halo. Coordinate scale unknown. \\
+Smileface-Twomoons & 7,000 points, 5 classes, 3.4\% noise & Re-created with the same phases: moons appear at chunk 12, eyes converge from chunk 51. \\
+KDD CUP'99 & 494,020 records, 34 attributes & First 10,000 records, online z-score. \\
+Forest CoverType & 581,012 records, 10 attributes & First 10,000 records, online z-score. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent Each chunk of $M=100$ elements is learned first and then labelled; quality is the Rand index (RI) of each chunk, noise excluded, averaged over the stream. We use $\delta=0.6$, $\eta=1$, $\zeta=2$ and the $(q, C)$ of Table~1 on the synthetic streams. On the standardised real streams the paper's $q$ ($0.011$ and $16$) makes the kernel vanish, so $q=0.02$ (KDD) and $q=0.15$ (CoverType) are used instead.
+
+%-----------------------------------------------------------------------
+\subsection{Main Results}
+\label{subsec:svstream_results}
+%-----------------------------------------------------------------------
+
+\begin{table}[H]
+\centering
+\caption{Paper findings vs.\ our measurements for every figure.}
+\label{tab:comprehensive_summary}
+\small
+\begin{tabularx}{\textwidth}{@{}l L L l@{}}
+\toprule
+\textbf{Fig.} & \textbf{Paper} & \textbf{Reproduction} & \textbf{Match} \\
+\midrule
+3 & Two synthetic streams & Re-created, visually similar & Input \\
+4 & $C=0.25$: 76 SVs, 10 BSVs; $C=1$: one cluster & $C=0.25$: 178 SVs, \textbf{0 BSVs}; $C=1$: one cluster & Partly \\
+5--6 & Avg.\ RI 0.9267 & Avg.\ RI \textbf{0.9179} & Yes \\
+7--12 & Avg.\ RI 0.9857; 53--126 SVs+BSVs & Avg.\ RI \textbf{0.7624}; 66$\to$246 SVs, 0 BSVs; collapse after chunk 51 & No \\
+13 & Detection 82--98\%, false alarms $<6\%$ & 0\% at $C=0.3$; at $C=0.015$ same trends, 5--46\% false alarms & Trends \\
+14 & RI stable in $M$; time grows with $M$; $\le 200$ SVs+BSVs & RI stable; time \emph{falls} with $M$; 162--250 SVs+BSVs & Partly \\
+15 & Best $q=9$ (Ring-Ball), $q=11$ (Smileface) & Best $q=9$ on Ring-Ball; Smileface still rising at $q=25$ & Ring-Ball \\
+16 & Clear optimum in $C$ & Flat in $C$ & No \\
+17 & $(\delta,\eta)=(0.6, 1.0)$ best & $\eta$ has no effect; $\delta=0.1$ best & No \\
+18 & SVStream best on all streams, smallest memory & Best on Ring-Ball and KDD; behind baselines on Smileface and CoverType & Partly \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig04.png}
+    \caption{Paper}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig4_ring_ball_bsv.png}
+    \caption{Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Figure~4, Ring-Ball. $C=1$ merges the two classes as in the paper, but at the paper's $C=0.25$ no BSV is ever created.}
+  \label{fig:comp_fig4}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{paper_fig05_06.png}
+    \caption{Paper}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{fig5_6_ring_ball_rand.png}
+    \caption{Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Figures~5--6, Ring-Ball. Average RI 0.918 vs.\ 0.927; as in the paper, only the first chunks are poor.}
+  \label{fig:comp_fig5_6}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{paper_fig11_12.png}
+    \caption{Paper}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{fig11_12_smileface_rand.png}
+    \caption{Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Figures~11--12, Smileface-Twomoons. Near-perfect before the moons appear (RI 0.998), then degrading until everything merges into one cluster in chunks 62--69.}
+  \label{fig:comp_fig11_12}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig18.png}
+    \caption{Paper}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig18_algorithm_comparison.png}
+    \caption{Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Figure~18, against River baselines. SVStream clearly wins on Ring-Ball but not on Smileface-Twomoons or CoverType.}
+  \label{fig:comp_fig18}
+\end{figure}
+
+%-----------------------------------------------------------------------
+\subsection{Why the Results Differ}
+\label{subsec:svstream_discrepancies}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{The box constraint of Eq.~(5) never binds.} With $\sum_i \beta_i = 1$ and $\beta_i \le C$, a sphere holds at most $\lfloor 1/C \rfloor$ BSVs (4 at $C=0.25$), yet the paper shows 10 BSVs at $C=0.25$ and 14 at $C=0.3$, so its $C$ is probably scaled differently (e.g.\ $1/(NC)$ as in support vector clustering). Implemented literally, $\beta_i$ stays far below $C$: no BSVs are created, BSV decay never fires, and noise is kept as SVs. This explains Figures~7--13 and~16: a growing summary, the late collapse on Smileface, 0\% outlier detection and flat $C$ curves.
+  \item \textbf{$q$ depends on the unpublished data scale.} The kernel only sees $q\|\mathbf{x}_i-\mathbf{x}_j\|^2$, so rescaling the data by $\alpha$ is the same as multiplying $q$ by $\alpha^2$. Our Ring-Ball scale happens to match the paper (best $q=9$); our Smileface scale does not (best $q > 25$).
+  \item \textbf{Real streams are small, standardised prefixes.} Only 10,000 of about 0.5M records are used. KDD prefix chunks contain one or two classes, which inflates RI (0.982 vs.\ 0.666 in the paper); on CoverType SVStream effectively forms a single cluster per chunk (RI $\approx$ 0.33 for every $q$ and $C$).
+  \item \textbf{Implementation and measurement.} Python/River code and River baselines (StrAP unavailable, DenStream $\varepsilon$ rescaled), memory counted on the model object only, and more QP solves for smaller $M$, which is why runtime falls as $M$ grows.
+\end{enumerate}
+
+\takeaway{SVStream reproduces on Ring-Ball (RI 0.918 vs.\ 0.927, best $q=9$), but most other results diverge, mainly because the literal $C$ of Eq.~(5) never creates BSVs. The $C$ scaling the authors actually used must be clarified before the remaining comparisons are meaningful.}

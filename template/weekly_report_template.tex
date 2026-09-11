@@ -1,5 +1,5 @@
 %=======================================================================
-%  WEEKLY REPORT — LaTeX TEMPLATE
+%  WEEKLY REPORT - LaTeX TEMPLATE
 %  Cấu trúc: 1) Executive Summary  2) Completed Tasks  3) Results &
 %            Visualization  4) Issues  5) Next Week Plan  6) References
 %
@@ -83,7 +83,7 @@
 \newcommand{\WeekRange}{08 Jun 2026 \textendash{} 14 Jun 2026}
 \newcommand{\AuthorName}{Nguyen Van A}
 \newcommand{\MentorName}{Dr. B, Dr. C}
-\newcommand{\PhaseName}{Phase 1 — Benchmark foundation}
+\newcommand{\PhaseName}{Phase 1 - Benchmark foundation}
 \newcommand{\RepoURL}{https://github.com/user/repo}
 
 %------------------------ Header / footer -----------------------------
@@ -133,7 +133,7 @@
 % Link bằng chứng
 \newcommand{\evi}[2]{\href{#1}{\texttt{\small #2}}}
 
-% Ảnh placeholder — thay bằng \includegraphics khi có hình thật
+% Ảnh placeholder - thay bằng \includegraphics khi có hình thật
 \newcommand{\ph}[2][0.9\linewidth]{%
   \begin{tikzpicture}
     \node[draw=neutral!45,dashed,fill=neutral!7,rounded corners=2pt,
@@ -196,18 +196,13 @@ Repository  & \evi{\RepoURL}{github.com/user/repo} & Report date & \today \\
 %=======================================================================
 \begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
                     itemsep=4pt,topsep=2pt]
-  \item[Objective —] Establish the core benchmark metrics suite for stream
+  \item[Objective -] Establish the core benchmark metrics suite for stream
         clustering, so that every algorithm added later can be scored with
         one unified, reproducible interface (maps to \PhaseName, milestone~P1.2).
 
-  \item[Status —] \Done\ \textbf{On Track} — the metric selection and the
+  \item[Status -] \Done\ \textbf{On Track} - the metric selection and the
         evaluation protocol were finalised on schedule; the calculation
         script is 60\% implemented and no blocker has appeared.
-
-  \item[Self-assessment —] $\approx$\,85\% of the weekly plan completed.
-        Quality is good on the design side (metrics are justified against
-        literature), weaker on the engineering side: the incremental
-        silhouette implementation still lacks unit tests.
 \end{description}
 
 \subsection*{Progress tracker}
@@ -231,7 +226,7 @@ Unit tests for incremental silhouette                      & P1.2 & \Planned & \
 \takeaway{Only the testing task slipped to next week; it is not on the critical
 path because the pipeline skeleton (P1.3) does not depend on it.}
 
-\noindent\textbf{Overall:} Week \WeekNo/\TotalWeeks{} — on schedule.
+\noindent\textbf{Overall:} Week \WeekNo/\TotalWeeks{} - on schedule.
 
 %=======================================================================
 \section{Completed Tasks}
@@ -263,10 +258,10 @@ path because the pipeline skeleton (P1.3) does not depend on it.}
 
 \subsection*{In progress}
 \begin{itemize}
-  \item \WIP\ \textbf{Incremental silhouette} (60\%) — the sampling-based
+  \item \WIP\ \textbf{Incremental silhouette} (60\%) - the sampling-based
         approximation works, but the error bound versus the exact score is
         still unmeasured. Expected completion: Mon of week \number\numexpr\WeekNo+1\relax.
-  \item \Planned\ \textbf{Unit tests + CI hook} (0\%) — moved to next week,
+  \item \Planned\ \textbf{Unit tests + CI hook} (0\%) - moved to next week,
         deliberately, to keep the metric API stable first.
 \end{itemize}
 
@@ -277,13 +272,12 @@ Research River internals: \textbf{6h} $\cdot$ Metric selection \& write-up:
 reading: \textbf{2h} $\cdot$ Mentor sync \& report: \textbf{1.5h}
 \quad$\Rightarrow$\quad\textbf{Total: 16.5h}.
 \normalsize\par
-% Bản chi tiết theo ngày nằm ở Appendix A.
 
 %=======================================================================
 \section{Results \& Visualization}
 %=======================================================================
 % GHI CHÚ: mọi hình/bảng đều phải có caption + \takeaway{...}.
-% Section này chứa TẤT CẢ các mẫu định dạng — xoá mẫu nào không dùng.
+% Section này chứa TẤT CẢ các mẫu định dạng - xoá mẫu nào không dùng.
 
 %-------------------------------------------------- 3.1 sơ đồ TikZ ----
 \subsection{Benchmark pipeline architecture}
@@ -408,7 +402,7 @@ stream length.}
 \label{fig:compare}
 \end{figure}
 \takeaway{The right-hand panel shows two micro-clusters that were never merged
-after the drift, i.e.\ the fading factor reacts too slowly — this is the
+after the drift, i.e.\ the fading factor reacts too slowly - this is the
 motivation for issue~I1 below.}
 
 %---------------------------------------- 3.5 ảnh + bảng cạnh nhau ----
@@ -493,7 +487,7 @@ $\in\{1..5\}$. Std.\ dev.\ $< 0.03$ everywhere.} \\
 \end{table}
 \takeaway{No algorithm dominates on all datasets: CluStream leads on the two
 synthetic streams while DenStream wins on the real, noisier \texttt{insects}
-data, which suggests noise robustness — not raw accuracy — is the property
+data, which suggests noise robustness - not raw accuracy - is the property
 worth isolating in week 4.}
 
 %---------------------------------------------- 3.8 biểu đồ ----------
@@ -524,7 +518,7 @@ worth isolating in week 4.}
          \texttt{sea} dataset.}
 \label{fig:chart}
 \end{figure}
-\takeaway{STREAMKMeans has the best silhouette but the worst ARI — a textbook
+\takeaway{STREAMKMeans has the best silhouette but the worst ARI - a textbook
 sign that it produces geometrically tidy clusters that do not match the true
 labels, so silhouette alone must never be used as the selection criterion.}
 
@@ -552,9 +546,9 @@ into the model and inflate every metric.}
   \item \textbf{Parameter sensitivity.} CluStream reacts strongly to the
         micro-cluster count $q$:
         \begin{itemize}
-          \item $q = 50$ — clusters merge too early, ARI drops by $0.09$;
-          \item $q = 200$ — quality plateaus, memory grows linearly;
-          \item $q = 100$ — chosen default, best quality/memory ratio.
+          \item $q = 50$ - clusters merge too early, ARI drops by $0.09$;
+          \item $q = 200$ - quality plateaus, memory grows linearly;
+          \item $q = 100$ - chosen default, best quality/memory ratio.
         \end{itemize}
   \item \textbf{Drift response.} Recovery after an abrupt drift takes
         $\approx 3$ windows for CluStream and $\approx 7$ for DenStream.
@@ -575,10 +569,10 @@ metric.
 % Nếu tuần trơn tru: xoá các issuebox và ghi rõ dòng dưới đây.
 % \noindent\textbf{No major blockers this week.}
 
-\begin{issuebox}{I1 — Fading factor reacts too slowly after abrupt drift}
+\begin{issuebox}{I1 - Fading factor reacts too slowly after abrupt drift}
 \begin{description}[font=\bfseries,style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,itemsep=2pt,topsep=2pt]
   \item[Type:] Technical / algorithmic.
-  \item[Impact:] \badge{warn}{Medium} — biases the drift-recovery numbers
+  \item[Impact:] \badge{warn}{Medium} - biases the drift-recovery numbers
         planned for week 5, but does not block the current phase.
   \item[Handling:] Reproduced with a minimal script
         (\evi{\RepoURL/issues/7}{issue \#7}); tested $\lambda \in \{0.25, 0.5, 1.0\}$
@@ -589,14 +583,14 @@ metric.
 \end{description}
 \end{issuebox}
 
-\begin{issuebox}{I2 — Ambiguity about which drift definition the proposal targets}
+\begin{issuebox}{I2 - Ambiguity about which drift definition the proposal targets}
 \begin{description}[font=\bfseries,style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,itemsep=2pt,topsep=2pt]
   \item[Type:] Conceptual.
-  \item[Impact:] \badge{bad}{High} — the choice between real and virtual
+  \item[Impact:] \badge{bad}{High} - the choice between real and virtual
         drift changes which datasets belong in the benchmark suite.
   \item[Handling:] Read Gama et al.\ (2014) and drafted two candidate scopes
         with the datasets each one implies (\evi{\RepoURL/blob/main/notes/drift-scope.md}{notes/drift-scope.md}).
-  \item[Mentor support:] \textbf{Yes} — a 10-minute decision at the next sync
+  \item[Mentor support:] \textbf{Yes} - a 10-minute decision at the next sync
         would unblock the dataset list for Phase~2. My recommendation:
         cover real drift only, and treat virtual drift as a stretch goal.
 \end{description}
@@ -647,7 +641,7 @@ items from this week and are scheduled first so the slip does not compound.}
   \item The two unfinished items (N1, N2) are front-loaded to Mon–Tue,
         before any new Phase-2 work starts.
   \item Estimated catch-up cost: 5h, absorbed inside the normal weekly budget
-        — no schedule extension required.
+        - no schedule extension required.
 \end{itemize}
 
 \subsection*{Risks for next week}
@@ -678,11 +672,11 @@ Notebook     & Metric sanity checks               & \evi{\RepoURL/blob/main/nb/0
 
 \subsection*{Datasets}
 \begin{itemize}
-  \item \textbf{SEA} (synthetic, 100k pts) — generated with
+  \item \textbf{SEA} (synthetic, 100k pts) - generated with
         \texttt{river.datasets.synth.SEA}, seed 42.
-  \item \textbf{Covertype} (581k pts) — UCI Machine Learning Repository,
+  \item \textbf{Covertype} (581k pts) - UCI Machine Learning Repository,
         \evi{https://archive.ics.uci.edu/dataset/31/covertype}{archive.ics.uci.edu/dataset/31}.
-  \item \textbf{INSECTS} (abrupt variant) — USP data stream repository.
+  \item \textbf{INSECTS} (abrupt variant) - USP data stream repository.
 \end{itemize}
 
 \subsection*{Literature and documentation}
@@ -699,37 +693,5 @@ Notebook     & Metric sanity checks               & \evi{\RepoURL/blob/main/nb/0
 \end{thebibliography}
 % Nếu muốn dùng BibTeX: thay khối trên bằng
 % \bibliographystyle{plain}\bibliography{refs}
-
-%=======================================================================
-\appendix
-\section{Detailed time log}
-%=======================================================================
-
-\begin{longtable}{@{}l p{8.1cm} l r@{}}
-\caption{Hours logged per day, week \WeekNo.}\label{tab:timelog}\\
-\toprule
-\textbf{Date} & \textbf{Activity} & \textbf{Category} & \textbf{Hours} \\
-\midrule
-\endfirsthead
-\multicolumn{4}{@{}l}{\small\itshape Table~\ref{tab:timelog} (continued)}\\
-\toprule
-\textbf{Date} & \textbf{Activity} & \textbf{Category} & \textbf{Hours} \\
-\midrule
-\endhead
-\midrule
-\multicolumn{4}{r@{}}{\small\itshape continued on next page}\\
-\endfoot
-\midrule
-\textbf{Total} & & & \textbf{16.5} \\
-\bottomrule
-\endlastfoot
-Mon 08 & Read River clustering source, take notes      & Research    & 4.0 \\
-Tue 09 & Compare CluStream vs.\ DenStream internals    & Research    & 2.0 \\
-Tue 09 & Shortlist candidate metrics                   & Design      & 3.0 \\
-Wed 10 & Implement \texttt{MetricRegistry}, ARI, purity& Engineering & 2.5 \\
-Thu 11 & Incremental silhouette (partial)              & Engineering & 1.5 \\
-Thu 11 & Concept-drift literature                      & Research    & 2.0 \\
-Fri 12 & Mentor sync + write this report               & Admin       & 1.5 \\
-\end{longtable}
 
 \end{document}

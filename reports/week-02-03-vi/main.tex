@@ -1,0 +1,45 @@
+%=======================================================================
+%  BÁO CÁO TUẦN - TÀI LIỆU LATEX CHÍNH (TIẾNG VIỆT)
+%=======================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+% 1. Load weekly configuration metadata
+\input{config.tex}
+
+% 2. Load shared styling and utility macros
+\usepackage{../../style/weeklyreport}
+\input{../../style/macros.tex}
+
+% 3. Graphics search paths
+\graphicspath{{figures/}{../../shared-assets/figures/}{../shared-assets/figures/}}
+
+\begin{document}
+
+%------------------------ TITLE BLOCK ---------------------------------
+\begin{center}
+  {\LARGE\bfseries\color{accentdark} Báo cáo Tiến độ Tuần \#\WeekNo\par}
+  \vspace{3pt}
+  {\large \ProjectName\par}
+\end{center}
+\vspace{4pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\small}l >{\small}X >{\bfseries\small}l >{\small}X@{}}
+\toprule
+Người thực hiện & \AuthorName            & Kỳ báo cáo & \WeekRange \\
+Cán bộ HD       & \MentorName            & Giai đoạn   & \PhaseName \\
+Kho lưu trữ     & \evi{\RepoURL}{github.com/user/repo} & Ngày báo cáo & \today \\
+\bottomrule
+\end{tabularx}
+\vspace{6pt}
+
+%------------------------ REPORT SECTIONS -----------------------------
+\input{sections/01_summary.tex}
+\input{sections/02_completed.tex}
+\input{sections/03_results.tex}
+\input{sections/04_issues.tex}
+\input{sections/05_next_week.tex}
+\input{sections/06_references.tex}
+
+\end{document}

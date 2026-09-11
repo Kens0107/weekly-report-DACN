@@ -1,0 +1,69 @@
+%=======================================================================
+\section{Các Công việc Đã Hoàn thành}
+%=======================================================================
+
+\begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=2.2em]
+  \item \textbf{Cài đặt River và thiết lập framework chạy pipeline} \hfill{\small(Giai đoạn 1 \& 2)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item Cài đặt thư viện River và tìm hiểu, xây dựng một repo/framework thống nhất để chạy pipeline, giúp việc vận hành thư viện River cũng như tích hợp và kiểm thử các thuật toán dễ dàng, thuận tiện hơn.
+    \item Đã cài đặt bổ sung và viết hàm gọi đầy đủ các metrics đánh giá từ River và scikit-learn:
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \textbf{Metrics ngoại vi (External):} ARI (Adjusted Rand Index), NMI (Normalized Mutual Information), AMI (Adjusted Mutual Information), Purity, Rand (RI).
+      \item \textbf{Metrics nội tại (Internal):} Silhouette, SSQ/SSE (Sum of Squared Errors), Davies--Bouldin, Calinski--Harabasz.
+    \end{itemize}
+  \end{itemize}
+
+  \item \textbf{Triển khai các thuật toán phân cụm luồng và chiến lược thực hiện} \hfill{\small(Giai đoạn 3)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item Đã triển khai 10 thuật toán trong tuần qua:
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \textbf{Nhóm thuật toán quan trọng, nền tảng và phổ biến:} DStream, HPStream, Birch, RepStream, SVstream.
+      \item \textbf{Nhóm thuật toán mở rộng:} DDStream, MrStream, DCUstream, improved\_Birch, SOStream.
+    \end{itemize}
+    \item \textbf{Chiến lược triển khai:} Chốt kế hoạch ưu tiên thực hiện các thuật toán quan trọng trước vì đây là những thuật toán nền tảng, đồng thời các thí nghiệm và cơ sở lý thuyết trong các bài báo gốc được thực hiện bài bản, chuẩn chỉnh $\rightarrow$ rất phù hợp để verify khi re-implement. Ngược lại, các thuật toán khác có thí nghiệm chứa nhiều nghi vấn về độ chính xác và mô tả thuật toán chưa rõ ràng.
+  \end{itemize}
+
+  \item \textbf{Thảo luận và nghiên cứu về Hyperparameter Benchmark cho Phân cụm Luồng} \hfill{\small(Phương pháp luận)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item \textbf{Thực trạng:}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \emph{Vấn đề Overfitting:} Đa số thuật toán phân cụm (đặc biệt cho data stream) báo cáo tham số được "tune" riêng trên dataset của tác giả. Khi benchmark trên dữ liệu khác, thuật toán suy giảm hiệu suất hoặc tiêu tốn thời gian/RAM ngoài dự kiến.
+      \item \emph{Thiếu công bằng trong so sánh:} Cerqueira et al.~\cite{cerqueira2026framework} chỉ ra việc chọn tham số cảm tính hoặc "tune" trên chính tập test gây sai lệch kết quả.
+      \item \emph{Mục tiêu cốt lõi:} Khi benchmark, cần tìm "bộ tham số hoạt động khách quan trên nhiều dataset" thay vì "bộ tham số tốt nhất cho một dataset".
+    \end{itemize}
+
+    \item \textbf{Hướng tham chiếu - Leave-one-dataset-out (LODO):}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \emph{Cơ chế (Cerqueira et al.~\cite{cerqueira2026framework}):} Dùng $n-1$ dataset để tìm cấu hình (random search tối ưu) và 1 dataset còn lại để đánh giá. Giúp bộ tham số độc lập với tập test, tăng độ bền vững.
+      \item \emph{Ưu điểm:} Tổng quát cho mọi thuật toán; đánh giá được nhiều cấu hình; dễ hiểu và đảm bảo tính tái lập.
+      \item \emph{Nhược điểm:} Tốn nhiều thời gian tính toán; không gian tìm kiếm quá lớn; random search nặng tính may rủi thay vì hiểu bản chất thuật toán.
+      \item \emph{Hạn chế chí mạng với Clustering:} LODO chuẩn thất bại vì tham số tuyệt đối (như $\epsilon$) không mang cùng ý nghĩa khi áp chéo giữa các dataset khác biệt về số chiều, thang đo và cấu trúc (ví dụ: KDD99 có 23 cụm, Shuttle có 2 cụm). Không có một mức tham số tĩnh nào thỏa mãn được mọi dataset.
+    \end{itemize}
+
+    \item \textbf{Đề xuất giải pháp - LODO có chủ đích với tham số tương đối:}
+    \begin{enumerate}[label=(\alph*),leftmargin=1.4em,itemsep=2pt]
+      \item \textbf{Chỉ tinh chỉnh (tune) các tham số "khóa":} Chỉ chọn 1--2 tham số ảnh hưởng trực tiếp đến cấu trúc và số lượng cụm, giữ mặc định các tham số còn lại tuỳ theo họ thuật toán:
+      \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+        \item \emph{Centroid (KMeans...):} $k$ (quyết định số cụm).
+        \item \emph{Mật độ (DenStream...):} $\epsilon$, \texttt{clustering\_threshold} (bán kính micro-cluster và điều kiện gộp/tách).
+        \item \emph{Lưới (DStream):} \texttt{grid\_width} (mật độ điểm tối thiểu để thành cụm).
+        \item \emph{Phân cấp (BIRCH...):} \texttt{threshold} (cách cây CF phân nhánh).
+        \item \emph{Đồ thị (RepStream):} $\alpha$ (mật độ điểm đại diện).
+      \end{itemize}
+      \item \textbf{Sử dụng tham số tương đối thay vì tuyệt đối:} Tinh chỉnh hệ số của hàm số dựa trên đặc trưng thống kê riêng của từng dataset ($\text{param\_value} = f(\text{var})$):
+      \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+        \item $\epsilon = c \cdot d$ (với $d$ là khoảng cách trung vị hoặc $k$-NN trung bình).
+        \item $\text{grid\_width} = \text{range}(X) / g$ (với $g$ là số ô mỗi chiều).
+        \item $\text{threshold} = c \cdot \sigma$ (với $\sigma$ là độ lệch chuẩn trung bình các chiều).
+        \item $k$ và $\alpha$: gắn với số lớp hoặc ước lượng mode trong mẫu.
+      \end{itemize}
+      \item \textbf{Lợi ích cốt lõi:} Dựa trên tiền lệ của Fan et al.~\cite{fan2020hyperparameter}, phương pháp này giúp một hệ số $c$ duy nhất có thể tự động co giãn theo đặc thù dữ liệu (tạo $\epsilon$ lớn cho dữ liệu thưa, nhỏ cho dữ liệu dày). Điều này loại bỏ hoàn toàn sự vô lý khi phải ép một tham số tuyệt đối dùng chung cho các dataset có cấu trúc và thang đo khác biệt (ví dụ: bộ 23 cụm và bộ 2 cụm).
+    \end{enumerate}
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Nhật ký Thời gian}
+\noindent\small
+Pipeline \& Metrics: \textbf{16h} $\cdot$ Triển khai Thuật toán: \textbf{24h} $\cdot$ Nghiên cứu Phương pháp luận Benchmark: \textbf{14h}
+\quad$\Rightarrow$\quad\textbf{Tổng cộng: 54h}.
+\normalsize\par

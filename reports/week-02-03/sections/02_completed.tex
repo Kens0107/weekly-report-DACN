@@ -1,0 +1,64 @@
+%=======================================================================
+\section{Completed Tasks}
+%=======================================================================
+
+\begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=2.2em]
+  \item \textbf{River Pipeline Setup and Evaluation Metrics Integration} \hfill{\small(Phases 1 \& 2)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item Installed River and established a unified pipeline execution framework to streamline streaming model execution, evaluation, and algorithm integration.
+    \item Implemented and wrapped comprehensive clustering evaluation metrics directly compatible with River streams:
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \textbf{External metrics:} Adjusted Rand Index (ARI), Normalized Mutual Information (NMI), Adjusted Mutual Information (AMI), Purity, Rand Index (RI).
+      \item \textbf{Internal metrics:} Silhouette Coefficient, Sum of Squared Errors (SSQ/SSE), Davies--Bouldin (DB) Index, Calinski--Harabasz (CH) Index.
+    \end{itemize}
+  \end{itemize}
+
+  \item \textbf{Stream Clustering Algorithm Implementations and Prioritization Strategy} \hfill{\small(Phase 3)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item Implemented 10 streaming clustering algorithms:
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \textbf{Foundational, standard, and widely cited:} DStream, HPStream, Birch, RepStream, SVstream.
+      \item \textbf{Exploratory/other models:} DDStream, MrStream, DCUstream, improved\_Birch, SOStream.
+    \end{itemize}
+    \item \textbf{Implementation Strategy:} Prioritize foundational algorithms first because they possess rigorous theoretical foundations and solid, reproducible experimental setups in original papers, making them ideal for verification. Conversely, other algorithms often present ambiguous algorithmic formulations and questionable experimental reproducibility.
+  \end{itemize}
+
+  \item \textbf{Research on Hyperparameter Benchmarking for Stream Clustering} \hfill{\small(Methodology)}\\
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item \textbf{Current State \& Challenges:}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \emph{Overfitting:} Most literature reports hyperparameters manually tuned specifically on the authors' chosen datasets. On different benchmarks, performance drops drastically or exhibits unexpected runtime/RAM spikes.
+      \item \emph{Unfair Comparison:} Cerqueira et al.~\cite{cerqueira2026framework} emphasize that heuristic parameter choices or tuning on test data creates severe evaluation bias.
+      \item \emph{Core Objective:} Identify hyperparameter configurations that perform robustly and objectively across diverse datasets, rather than finding an isolated "best" parameter for a single dataset.
+    \end{itemize}
+
+    \item \textbf{Reference Baseline - Leave-One-Dataset-Out (LODO):}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item \emph{Mechanism (Cerqueira et al.~\cite{cerqueira2026framework}):} Use $n-1$ datasets to search for optimal configurations (via random search) and evaluate on the remaining held-out dataset. Keeps tuning independent from test data.
+      \item \emph{Advantages:} Model-agnostic, evaluates wide parameter spaces, straightforward, reproducible.
+      \item \emph{Drawbacks:} High computational cost, enormous search space, reliance on chance rather than domain insight.
+      \item \emph{Fatal Limitation for Clustering:} Standard LODO fails because static absolute parameters (e.g., fixed $\epsilon$) lack consistent geometric meaning across datasets with varying dimensionality, scales, and cluster counts (e.g., KDD99 with 23 clusters vs. Shuttle with 2 clusters). No single static absolute value works universally.
+    \end{itemize}
+
+    \item \textbf{Proposed Solution - Purposeful LODO with Relative Parameters:}
+    \begin{enumerate}[label=(\alph*),leftmargin=1.4em,itemsep=2pt]
+      \item \textbf{Tune Key Parameters Only:} Focus exclusively on 1--2 pivotal parameters (or more depending on algorithm)  cluster structure and granularity, for exammples:
+      \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+        \item \emph{Centroid (KMeans, etc.):} $k$ (number of clusters).
+        \item \emph{Density (DenStream, etc.):} $\epsilon$, \texttt{clustering\_threshold} (micro-cluster radius and merge/split criterion).
+        \item \emph{Grid (DStream, etc.):} \texttt{grid\_width} (cell density threshold).
+        \item \emph{Hierarchical (BIRCH, etc.):} \texttt{threshold} (CF-tree branching threshold).
+        \item \emph{Graph (RepStream, etc.):} $\alpha$ (representative point density).
+      \end{itemize}
+      \item \textbf{Use Relative Parameters via Data Statistics ($\text{param} = f(\text{stats})$):} Tune relative scaling coefficients instead of static values:
+      \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+        \item $\epsilon = c \cdot d$, where $d$ is median pairwise distance or average $k$-NN distance.
+        \item $\text{grid\_width} = \text{range}(X) / g$, where $g$ is target divisions per dimension.
+        \item $\text{threshold} = c \cdot \sigma$, where $\sigma$ is mean standard deviation across dimensions.
+        \item $k$ and $\alpha$ tied to class counts or sample mode estimates.
+      \end{itemize}
+      \item \textbf{Core Benefit:} Supported by the precedent of Fan et al.~\cite{fan2020hyperparameter}, a single scaling coefficient $c$ automatically adapts to data density (larger $\epsilon$ for sparse data, smaller for dense data), eliminating the flaw of enforcing rigid absolute values across heterogeneous datasets.
+    \end{enumerate}
+  \end{itemize}
+\end{enumerate}
+

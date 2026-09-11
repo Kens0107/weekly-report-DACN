@@ -1,0 +1,341 @@
+%=======================================================================
+\section{Experimental Reproduction and Comparative Study of SVStream}
+\label{sec:svstream_reproduction}
+%=======================================================================
+
+This section presents a rigorous reproduction of the experimental study in the seminal paper \emph{``SVStream: A Support Vector-Based Algorithm for Clustering Data Streams''} (Wang et al., IEEE TKDE 2013)~\cite{wang2013svstream}. We reimplemented the SVStream algorithm natively within our streaming benchmark framework based on River, systematically regenerated the experimental pipelines, and conducted side-by-side visual and numerical comparisons across all original benchmark figures (Figures~3 through 18).
+
+%-----------------------------------------------------------------------
+\subsection{Experimental Setup and Evaluation Protocol}
+\label{subsec:svstream_setup}
+%-----------------------------------------------------------------------
+
+Because the original benchmark code and synthetic data distributions were not publicly released, we reconstructed the experimental streams following the paper's descriptions, geometric parameters, and figures.
+
+\begin{table}[H]
+\centering
+\caption{Benchmark datasets: Paper specifications vs. Reproduction setup.}
+\label{tab:dataset_specs}
+\small
+\begin{tabularx}{\textwidth}{@{}l L L L@{}}
+\toprule
+\textbf{Dataset} & \textbf{Original Paper Specification} & \textbf{Reproduction Implementation} & \textbf{Key Discrepancies / Notes} \\
+\midrule
+\textbf{Ring-Ball} & 2,000 points in 2D, 2 overlapping classes. Generated in random order. & Reconstructed with ring radius $R=3$ and ball $\sigma=0.39$, where $5\%$ ball points are spread ($\sigma=1.15$) into the gap. Seed fixed to 42. & Paper provides no absolute coordinate scale. Length scale chosen geometrically to mimic Figure~3a. \\
+\addlinespace[2pt]
+\textbf{Smileface-} & 7,000 points in 2D, 5 classes, 70 chunks of $M=100$, 3.4\% uniform noise (238 points). & Faithfully reconstructed: 3 smile classes first (chunks 1--11), 2 moons appear (chunk 12), eyes drift 55\% closer (chunk 51). & Same sequential drift phases. Relative spatial scale calibrated visually against Figure~3b. \\
+\textbf{Twomoons} & \\
+\addlinespace[2pt]
+\textbf{KDD CUP'99} & 494,020 subsampled network connection records, 34 continuous features, 5 attack/normal classes. & First 10,000 records of the 10\% subset (\texttt{sklearn}), 34 continuous attributes. Standardized via incremental online z-score. & Evaluates prefix stream ($\approx 2\%$ of volume). Online standard scaler applied; paper did not mention feature normalization. \\
+\addlinespace[2pt]
+\textbf{Forest} & 581,012 observations, 10 quantitative environmental features, 7 forest cover types. & First 10,000 records, 10 quantitative variables, standardized via online incremental z-score. & Evaluates prefix stream ($\approx 1.7\%$ of volume). Paper evaluated raw scale without normalization. \\
+\textbf{CoverType} & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Execution and Scoring Protocol:}
+\begin{itemize}
+  \item \textbf{Chunk-wise Execution:} The data stream arrives in sequential chunks of size $M=100$. For each chunk $\mathcal{X}^t$, all $M$ samples are first observed by the model (\texttt{learn\_one}), triggering multisphere creation, updating, and merging (Algorithm 1 in~\cite{wang2013svstream}). The cluster labels for $\mathcal{X}^t$ are subsequently assigned (\texttt{predict\_one}).
+  \item \textbf{Evaluation Metric:} The clustering quality is evaluated via the chunk-wise Rand Index (RI)~\cite{wang2013svstream}:
+  \begin{equation}
+    \text{RI} = \frac{N_{11} + N_{00}}{\binom{N}{2}},
+  \end{equation}
+  where injected noise elements (ground-truth label \texttt{None}) are excluded from the Rand Index calculation, exactly following Section~4.1 of the paper. The stream performance is quantified by the average Rand Index across all chunks.
+  \item \textbf{Default Hyperparameters:} Following Table~1 and Section~4.1 of the paper, default multisphere parameters are set to outer-sphere threshold $\delta=0.6$, sphere merging threshold $\eta=1.0$, and BSV decaying threshold $\zeta=2.0$. For synthetic streams, $(q, C)$ are configured as in Table~1: $q=9, C=0.25$ on Ring-Ball, and $q=11, C=0.3$ on Smileface-Twomoons. For real streams, tuned values $q=0.02$ (KDD) and $q=0.15$ (CoverType) are deployed instead of the paper's $0.011$ and $16$, because on standardized features the paper's parameters lead to numerical kernel underflow.
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Side-by-Side Visual Comparison and Empirical Findings}
+\label{subsec:svstream_visual_comp}
+%-----------------------------------------------------------------------
+
+Below, each figure from Wang et al.~\cite{wang2013svstream} is compared directly against the corresponding empirical outcome from our River reproduction.
+
+%--- Figure 3 ---
+\subsubsection{Figure 3: Synthetic Stream Distributions}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.8cm,keepaspectratio]{paper_fig03.png}
+    \caption{Original Paper (Figure 3)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.8cm,keepaspectratio]{fig3_synthetic_distributions.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Comparison of synthetic stream distributions: (a) Ring-Ball and (b) Smileface-Twomoons.}
+  \label{fig:comp_fig3}
+\end{figure}
+\noindent\textbf{Discussion:} The topological geometries of both streams are faithfully reconstructed. Ring-Ball preserves the overlapping density boundary between the central sphere and outer annulus. Smileface-Twomoons exhibits identical multi-phase structures with 3.4\% uniform background noise. However, because absolute coordinates were not documented in the paper, any choice of coordinate scale directly alters the effective kernel bandwidth product $q\|\mathbf{x}_i - \mathbf{x}_j\|^2$.
+
+%--- Figure 4 ---
+\subsubsection{Figure 4: Overlapping Cluster Separation with and without BSVs}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig04.png}
+    \caption{Original Paper (Figure 4)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig4_ring_ball_bsv.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Impact of box constraint $C$ on overlapping cluster separation in Ring-Ball.}
+  \label{fig:comp_fig4}
+\end{figure}
+\noindent\textbf{Discussion:} At $C=1.0$ (no BSVs allowed), both studies observe the identical catastrophic failure mode: overlapping disturbance points force the support vectors to bridge the gap, falsely merging the two classes into a single macro-cluster (Rand index drops to $0.495$). However, at $C=0.25$, the paper reports $76$ SVs and $10$ BSVs cleanly partitioning the clusters. In our run under the literal formulation of Equation~(5), the multipliers never saturate at $C=0.25$, resulting in $178$ SVs, $0$ BSVs, and $10$ sub-clusters (Rand $0.917$). Lowering $C$ to $0.04$ produces $33$ SVs and $5$ BSVs (Rand $0.615$). Only the collapse behavior at $C=1.0$ reproduces faithfully.
+
+%--- Figures 5 & 6 ---
+\subsubsection{Figures 5 \& 6: Chunk-wise Rand Index and Erroneous Chunks on Ring-Ball}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{paper_fig05_06.png}
+    \caption{Original Paper (Figures 5 \& 6)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{fig5_6_ring_ball_rand.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Rand Index evolution across 20 chunks and erroneous chunk profiles on Ring-Ball.}
+  \label{fig:comp_fig5_6}
+\end{figure}
+\noindent\textbf{Discussion:} The average Rand Index matches the paper closely: \textbf{0.9179} in our reproduction versus \textbf{0.9267} in the paper. Both observe that initial chunks suffer from temporary performance drops due to spatial sample sparsity creating artificial intra-cluster gaps. However, whereas the paper reports correct cluster counts in 85\% of chunks (with only 2 bad chunks), our run identifies the correct cluster count ($k=2$) in only 30\% of chunks, frequently over-segmenting the annular ring into disconnected components.
+
+%--- Figures 7-10 ---
+\subsubsection{Figures 7--10: Multi-stage Concept Drift Evolution on Smileface-Twomoons}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{paper_fig07_10.png}
+    \caption{Original Paper (Figures 7--10)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{fig7_10_smileface_steps.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Multisphere boundary adaptation at key steps (10, 12, 51, and 70) on Smileface-Twomoons.}
+  \label{fig:comp_fig7_10}
+\end{figure}
+\noindent\textbf{Discussion:} In early stages (steps 10 and 12), the algorithm accurately tracks cluster births and boundaries (Rand $1.00$ and $0.96$). However, in the paper, the support vector count remains bounded throughout the stream ($50$--$117$ SVs and $3$--$14$ BSVs). In our run, the SV count grows monotonically ($66 \to 82 \to 201 \to 246$) with strictly $0$ BSVs. By steps 51 and 70, without BSV decay to eliminate noise points, support vectors encompass background noise, shattering the decision boundary into diffuse patches and causing terminal chunk Rand index to collapse to $0.21$.
+
+%--- Figures 11 & 12 ---
+\subsubsection{Figures 11 \& 12: Evolving Stream Rand Profile and Bad Chunks}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{paper_fig11_12.png}
+    \caption{Original Paper (Figures 11 \& 12)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{fig11_12_smileface_rand.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Step-wise Rand Index on Smileface-Twomoons and identified failure chunks.}
+  \label{fig:comp_fig11_12}
+\end{figure}
+\noindent\textbf{Discussion:} A significant performance divergence occurs here: the paper reports an average Rand Index of \textbf{0.9857} (65/70 chunks above 0.95), whereas our run achieves \textbf{0.7624} (only 16/70 chunks above 0.95). Decomposing by stream phase:
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+  \item \emph{Phase 1 (Smileface alone, chunks 1--11):} Mean Rand is near-perfect at \textbf{0.998}.
+  \item \emph{Phase 2 (Moons appear, chunks 12--50):} Mean Rand remains strong at \textbf{0.815}.
+  \item \emph{Phase 3 (Eyes converge, chunks 51--70):} Performance drops to \textbf{0.531}, and in chunks 62--69 the entire stream collapses into a single merged cluster ($\text{RI} \approx 0.20$).
+\end{itemize}
+
+%--- Figure 13 ---
+\subsubsection{Figure 13: Outlier Detection Rate and False Alarm Tradeoff}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{paper_fig13.png}
+    \caption{Original Paper (Figure 13)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{fig13_outlier_detection.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Detection rate vs. False detection rate of outliers under varying $\zeta$, $C$, and $q$.}
+  \label{fig:comp_fig13}
+\end{figure}
+\noindent\textbf{Discussion:} At the paper's nominal parameter $C=0.30$, our model yields \textbf{0\% detection rate and 0\% false alarm} because no BSVs are ever formed ($\beta_i < C$ for all $i$). When $C$ is reduced to $0.015$ where the constraint activates, the qualitative parametric trends match the paper: decreasing $\zeta$ from 5 to 1 increases detection from $70.2\%$ to $88.7\%$ while elevating false alarms from $4.5\%$ to $35.9\%$; lowering $C$ from $0.022$ to $0.010$ boosts detection ($51\% \to 89\%$) but spikes false alarm ($5\% \to 46\%$). However, the absolute false alarm levels are substantially higher than the paper's reported range ($0.3\%$--$5.5\%$).
+
+%--- Figure 14 ---
+\subsubsection{Figure 14: Sensitivity to Chunk Size \texorpdfstring{$M$}{M}}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.0cm,keepaspectratio]{paper_fig14.png}
+    \caption{Original Paper (Figure 14)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.0cm,keepaspectratio]{fig14_chunk_size.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Impact of chunk size $M$ on Rand index, execution time, support vector count, and memory.}
+  \label{fig:comp_fig14}
+\end{figure}
+\noindent\textbf{Discussion:} In agreement with the paper, Rand index remains stable across $M \in [50, 300]$ (peaking at $M=100$ for Ring-Ball and $M=50$ for Smileface). The memory usage increases with dimensionality (KDD takes $\approx 100$\,KB vs $\approx 20$\,KB for 2D streams). However, execution time exhibits an \textbf{opposite trend}: runtime decreases as $M$ increases. This occurs because smaller $M$ requires solving the quadratic programming (QP) optimization far more frequently over the fixed dataset length.
+
+%--- Figure 15 ---
+\subsubsection{Figure 15: Sensitivity to Gaussian Kernel Width \texorpdfstring{$q$}{q}}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{paper_fig15.png}
+    \caption{Original Paper (Figure 15)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{fig15_kernel_width.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Average Rand Index as a function of Gaussian kernel parameter $q$.}
+  \label{fig:comp_fig15}
+\end{figure}
+\noindent\textbf{Discussion:} On Ring-Ball, reproduction achieves \textbf{exact resonance}: peak Rand index occurs precisely at $q=9$ ($0.918$), with an optimal plateau spanning $q \in [7, 13]$ ($\text{RI} \ge 0.85$). On Smileface, our curve continues climbing up to $q=25$ ($0.895$) rather than peaking at $11$. On KDD, Rand decreases gradually from $0.990$ to $0.966$. On Forest CoverType, the curve is completely flat at $0.328$--$0.332$, reflecting single-cluster classification regardless of $q$.
+
+%--- Figure 16 ---
+\subsubsection{Figure 16: Sensitivity to Tradeoff Parameter \texorpdfstring{$C$}{C}}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.4cm,keepaspectratio]{paper_fig16.png}
+    \caption{Original Paper (Figure 16)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.4cm,keepaspectratio]{fig16_tradeoff_c.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Average Rand Index versus tradeoff parameter $C$.}
+  \label{fig:comp_fig16}
+\end{figure}
+\noindent\textbf{Discussion:} The paper reports prominent optimal peaks around $C=0.25$ and $C=0.30$. In contrast, our empirical curves are \textbf{completely flat} across $[0.10, 0.32]$ on Ring-Ball ($0.917$--$0.923$), KDD ($0.981$--$0.982$), and CoverType ($0.3277$). As analyzed in Section~\ref{subsec:svstream_discrepancies}, the box constraint $\beta_i \le C$ is numerically inactive across this entire range under Equation~(5), rendering $C$ functionally inert.
+
+%--- Figure 17 ---
+\subsubsection{Figure 17: Sensitivity to Multisphere Thresholds \texorpdfstring{$(\delta, \eta)$}{(delta, eta)}}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{paper_fig17.png}
+    \caption{Original Paper (Figure 17)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{fig17_multisphere_thresholds.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Average Rand Index across the grid of out-sphere threshold $\delta$ and merging threshold $\eta$.}
+  \label{fig:comp_fig17}
+\end{figure}
+\noindent\textbf{Discussion:} In our experiments, the sphere merging threshold $\eta$ exhibits \textbf{zero impact} across tested rows (identical values across all $\eta$ slices). Contrary to the paper's recommendation of $(\delta=0.6, \eta=1.0)$, smaller $\delta$ values perform superiorly: Smileface achieves $0.81$ at $\delta=0.1$ versus $0.76$ at the default $\delta=0.6$, because finer sphere allocation prevents premature merging in noisy environments.
+
+%--- Figure 18 ---
+\subsubsection{Figure 18: Benchmark Comparison with Baseline Stream Algorithms}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig18.png}
+    \caption{Original Paper (Figure 18)}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig18_algorithm_comparison.png}
+    \caption{River Reproduction}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Comparative performance (Rand Index, execution time, and memory) against baseline algorithms.}
+  \label{fig:comp_fig18}
+\end{figure}
+\noindent\textbf{Discussion:} On non-linear overlapping streams like Ring-Ball, SVStream decisively outperforms linear baselines (\textbf{0.918} vs $\le 0.60$ for baselines), and leads on standardized KDD (\textbf{0.982}). However, on Smileface-Twomoons, SVStream ($0.762$) trails CluStream ($0.856$), DenStream ($0.827$), and StreamKM ($0.784$). On CoverType, it scores $0.328$ (essentially single-cluster baseline vs $0.63$--$0.67$ for baselines). For memory consumption, SVStream is smallest on Ring-Ball, whereas DenStream demonstrates smaller pure model footprint on the other three datasets.
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive quantitative comparison across all 11 evaluation figures.}
+\label{tab:comprehensive_summary}
+\small
+\begin{tabularx}{\textwidth}{@{}l L L c@{}}
+\toprule
+\textbf{Figure} & \textbf{Original Paper Finding} & \textbf{Our Measured Reproduction} & \textbf{Agreement Status} \\
+\midrule
+\textbf{Fig 3} & 2 synthetic streams (Ring-Ball \& Smileface) & Reconstructed geometries visually identical & Input verified \\
+\textbf{Fig 4} & $C=0.25$: 76 SVs, 10 BSVs; $C=1$: single cluster & $C=1$ merges (0.495). $C=0.25$: 178 SVs, 0 BSVs (0.917) & Partial ($C=1$ matched) \\
+\textbf{Figs 5--6} & Mean Rand 0.9267; 85\% correct cluster count chunks & Mean Rand \textbf{0.9179}; 30\% correct cluster count chunks & Rand matches; $k$ differs \\
+\textbf{Figs 7--10} & 50--117 SVs, 3--14 BSVs; bounded clean contours & 66 $\to$ 246 SVs, 0 BSVs; contour shatters on noise & Diverges in late stream \\
+\textbf{Figs 11--12} & Mean Rand 0.9857; 65/70 chunks $>0.95$ & Mean Rand \textbf{0.7624}; 16/70 chunks $>0.95$; late collapse & Discrepant in drift phases \\
+\textbf{Fig 13} & 82--98\% detection, 0.3--5.5\% false alarms at $C=0.3$ & 0\% at $C=0.30$; at $C=0.015$: matched trends, higher false alarms & Trend matches at lower $C$ \\
+\textbf{Fig 14} & Rand stable; runtime rises with $M$; $\le 200$ SVs+BSVs & Rand stable; runtime \emph{drops} with $M$; 162--250 SVs & Mixed \\
+\textbf{Fig 15} & Ring-Ball optimal at $q=9$; wide usable plateaus & Ring-Ball peak \textbf{exact at $q=9$}; Smileface rises past 25 & Excellent on Ring-Ball \\
+\textbf{Fig 16} & Sharp optima at $C=0.25$ and $C=0.30$ & Completely flat curves across $C \in [0.10, 0.32]$ & Discrepant (inactive box) \\
+\textbf{Fig 17} & $(\delta=0.6, \eta=1.0)$ optimal default & $\eta$ has zero impact; smaller $\delta$ ($0.1$) achieves 0.81 & Discrepant \\
+\textbf{Fig 18} & SVStream leads all datasets; 10\% memory of 2nd & SVStream leads 2 of 4; trails on Smileface \& CoverType & Partial agreement \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%-----------------------------------------------------------------------
+\subsection{In-Depth Root-Cause Analysis: Why Results Differ}
+\label{subsec:svstream_discrepancies}
+%-----------------------------------------------------------------------
+
+Through analytical auditing and ablation experiments, we pinpointed five fundamental structural causes behind the observed discrepancies:
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Unstandardized Spatial Length Scales and Kernel Bandwidth Coupling:}
+  The Gaussian kernel evaluates $K(\mathbf{x}_i, \mathbf{x}_j) = \exp(-q \|\mathbf{x}_i - \mathbf{x}_j\|^2)$. The kernel parameter $q$ cannot be transferred independently of the spatial coordinate scale: scaling coordinates by factor $\alpha$ transforms the exponent by $\alpha^2$, which is equivalent to replacing $q$ by $q/\alpha^2$. Ring-Ball's geometric reconstruction happened to match the paper's spatial scale closely, reproducing the exact optimal $q=9$ in Figure~15. For Smileface, our coordinate bounding box was tighter, shifting the optimal bandwidth beyond $q=25$.
+
+  \item \textbf{Mathematical Inconsistency in Eq.~(5) Box Constraint Normalization:}
+  This is the single most critical structural discovery of our study. In the paper's dual optimization formulation (Equation~5):
+  \begin{equation}
+    \sum_{i=1}^N \beta_i = 1 \quad \text{subject to} \quad 0 \le \beta_i \le C.
+  \end{equation}
+  Under this constraint, the maximum theoretical number of Bounded Support Vectors (where $\beta_i = C$) is strictly bounded by:
+  \begin{equation}
+    N_{\text{BSV}} \le \left\lfloor \frac{1}{C} \right\rfloor.
+  \end{equation}
+  For $C=0.25$, there can be at most \textbf{4 BSVs}; for $C=0.30$, at most \textbf{3 BSVs}. Yet the paper's own figures report \textbf{10 BSVs at $C=0.25$} (Figure~4b) and \textbf{14 BSVs at $C=0.30$} (Figure~8b). Ten multipliers at $0.25$ sum to $2.5$, which violates $\sum \beta_i = 1$. The authors most likely implemented Ben-Hur's Support Vector Clustering convention~\cite{wang2013svstream} where the upper bound is scaled by sample size as $\frac{1}{N \cdot C}$. When implementing Equation~(5) literally, the unconstrained maximum multiplier on a chunk of size $100$ is approximately $0.026$, meaning the constraint $\beta_i \le C$ never binds for $C \in [0.1, 0.3]$. Consequently:
+  \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+    \item No BSVs are ever created, causing the BSV decaying mechanism to remain dormant (0\% outlier detection in Figure~13 at $C=0.3$).
+    \item Outlier noise elements are never purged; instead, they become persistent SVs ($66 \to 246$), creating bridging contours across clusters and causing late-stage cluster collapse.
+    \item Sweeping $C$ across $[0.1, 0.3]$ leaves the optimization solution completely unchanged, producing flat lines in Figure~16.
+  \end{itemize}
+
+  \item \textbf{Subsampling and Standardization Nuances on Real-World Streams:}
+  Evaluating the first 10,000 records of KDD CUP'99 yields localized chunks that are predominantly homogeneous (often containing only 1--2 attack types), inflating the chunk-wise Rand Index ($0.982$ vs paper's $0.666$ over 494k records). On Forest CoverType, unstandardized features span thousands of meters, causing $K(\mathbf{x}_i, \mathbf{x}_j) \to 0$ for almost all pairs at the paper's nominal $q=16$. Online z-score standardization restores numerical conditioning, but the 10 quantitative variables exhibit heavy multi-modal overlap where SVStream assigns all samples to a single macro-domain (Rand $0.328$).
+
+  \item \textbf{Algorithmic Complexity of Incremental QP Solvers:}
+  The discrepancy in Figure~14 (execution time decreasing with chunk size $M$) stems from solver invocation overhead. Because SVStream resolves quadratic programming incrementally upon receiving chunk updates, smaller $M$ requires solving QP many times more frequently over the same total data length. For modern numerical QP solvers, the per-chunk overhead dominates over chunk size scaling in this parameter range.
+
+  \item \textbf{Adjacency Matrix Topology and Inner Point Connectivity:}
+  Following the paper's update rule, inner points ($R(\mathbf{x}) < R_{SV}$) are incorporated into the multisphere adjacency matrix. When noise support vectors expand the bounding contours, inner points bridge disconnected components across clusters, accelerating cluster over-merging in dynamic drift scenarios.
+\end{enumerate}
+
+\takeaway{Reproduction rigorously validates SVStream's strengths in handling complex non-linear boundaries (Ring-Ball RI: 0.918), but exposes a vital mathematical discrepancy in the paper's $C$ constraint scaling. Resolving the box constraint normalization is essential to reactivating BSV decay and preventing late-stream boundary degradation.}
