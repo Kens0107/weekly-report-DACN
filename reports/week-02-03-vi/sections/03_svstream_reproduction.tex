@@ -1,0 +1,283 @@
+%=======================================================================
+\section{Tái hiện Thực nghiệm SVStream}
+\label{sec:svstream_reproduction}
+%=======================================================================
+
+Chúng tôi đã tái hiện (reproduce) nghiên cứu thực nghiệm của SVStream~\cite{wang2013svstream} (Hình~3--18) dựa trên phiên bản cài đặt trong River cùng khung benchmark tự xây dựng. Bất kỳ sai khác nào về dữ liệu đầu vào đều phản ánh trực tiếp lên kết quả, do đó phần này trước hết nêu rõ những thiết lập đầu vào nào có thể tuân theo bài báo gốc và những điểm nào không thể, kế đến trình bày cách xử lý và hiệu chuẩn các thông số còn bỏ ngỏ, và cuối cùng so sánh chi tiết kết quả theo từng hình.
+
+%-----------------------------------------------------------------------
+\subsection{Dữ liệu và Thiết lập Đầu vào: Những Điểm Tuân theo và Khác biệt so với Bài báo}
+\label{subsec:svstream_inputs}
+%-----------------------------------------------------------------------
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \textbf{Ring-Ball và Smileface-Twomoons không thể khớp hoàn toàn với bài báo} (Hình~3 và mọi hình sử dụng hai tập dữ liệu này). Bộ dữ liệu gốc không được công bố công khai và các hình ảnh trong bài báo không có trục tọa độ, nên việc phỏng đoán tọa độ bằng mắt sẽ không giúp dữ liệu tiệm cận bài báo hơn mà chỉ làm tăng tính tùy biến cảm tính. Chúng tôi giữ nguyên các đặc tính bài báo đã mô tả (kích thước mẫu, số lớp, tỷ lệ nhiễu, thứ tự các pha trôi dạt dữ liệu) và hiệu chuẩn thang đo tọa độ \emph{một lần duy nhất} dựa theo giá trị $q$ tối ưu trong Hình~15 của bài báo (Mục~\ref{subsec:svstream_calibration}). Để khớp hoàn toàn cần phải có dữ liệu gốc từ nhóm tác giả.
+  \item \textbf{Phương pháp chuẩn hóa các luồng dữ liệu thực tế không được nêu trong bài báo.} Phương pháp này cũng được lựa chọn thông qua cùng một bước hiệu chuẩn duy nhất và được ghi nhận tường minh.
+  \item \textbf{KDD CUP'99 và Forest CoverType được lấy mẫu tiền tố.} Lần chạy này sử dụng 10.000 bản ghi đầu tiên của mỗi luồng trong tất cả các hình (Hình~14--16 và 18), trong khi bài báo chạy toàn bộ luồng với 494.020 và 581.012 bản ghi. Khung benchmark hỗ trợ chạy toàn bộ luồng, nhưng sẽ tiêu tốn hàng chục giờ tính toán. Hình~18 ngoài ra còn giữ nguyên thiết lập trước đó (online running z-score, $q=0.02$ / $0.15$, luồng tổng hợp không co giãn). Do đó, các chỉ số trên luồng dữ liệu thực không thể so sánh trực tiếp theo giá trị tuyệt đối với bài báo.
+\end{itemize}
+
+\begin{table}[!ht]
+\centering
+\caption{Các yếu tố đầu vào của bản tái hiện so với bài báo gốc.}
+\label{tab:svstream_inputs}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}l L L l@{}}
+\toprule
+\textbf{Yếu tố đầu vào} & \textbf{Bài báo gốc} & \textbf{Bản chạy này} & \textbf{Trùng khớp?} \\
+\midrule
+Tham số và lưới quét & Bảng~1 ($M$, $q$, $C$); $\delta=0.6$, $\eta=1$, $\zeta=2$; lưới quét ở Hình~13--17 & Giữ nguyên như bài báo ở Hình~3--17 & Có \\
+Luồng dữ liệu tổng hợp & Không công bố; hình không có trục tọa độ & Giữ nguyên các đặc tính mô tả; hiệu chuẩn thang tọa độ một lần duy nhất & Không \\
+KDD CUP'99 & 494.020 bản ghi, 34 thuộc tính, ``loại bỏ 1 điểm ngoại lai'' & 10.000 bản ghi đầu theo thứ tự gốc (bài báo không nêu rõ đã loại bỏ điểm ngoại lai nào; theo phỏng đoán của chúng tôi, bản ghi có chuẩn z-score lớn nhất tại vị trí 346.366 nằm ngoài đoạn này) & Không \\
+Forest CoverType & 581.012 bản ghi, 10 thuộc tính & 10.000 bản ghi đầu theo thứ tự gốc & Không \\
+Chuẩn hóa dữ liệu & Không đề cập & Hiệu chuẩn một lần: KDD dùng online z-score, CoverType dùng min-max & Không \\
+Lưới quét Hình~13 & $C \in [0.26, 0.34]$ & 13a: lưới của bài báo; 13b: $C \in [0.010, 0.022]$, vùng ràng buộc hộp phát huy tác dụng & Chỉ khớp 13a \\
+Hình~18 & Toàn bộ luồng, $q$ gốc của bài báo & 10.000 bản ghi, online z-score, $q=0.02$ / $0.15$, luồng tổng hợp không co giãn & Không \\
+Mô hình đối chuẩn, nền tảng & Có StrAP; cài đặt không nêu rõ trên PC Core2 Duo; đo bộ nhớ đỉnh (peak memory) & Baseline trong River không có StrAP; Python; kích thước mô hình (model size) & Không \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%-----------------------------------------------------------------------
+\subsection{Hiệu chuẩn các Yếu tố Đầu vào Chưa Xác định}
+\label{subsec:svstream_calibration}
+%-----------------------------------------------------------------------
+
+\noindent\textbf{Thang đo tọa độ.} Một hàm nhân Gaussian (Gaussian kernel) với độ rộng $q$ trên dữ liệu được co giãn theo tỷ lệ $s$ hoạt động tương đương với $q s^2$ trên dữ liệu chưa co giãn, do đó một lượt quét duy nhất giá trị $q$ trên luồng chưa co giãn sẽ xác định được $s = \sqrt{q^*/q_{\text{paper}}}$. Ring-Ball đạt đỉnh tại $q^*=8$ so với giá trị $9$ trong bài báo ($s=0.943$); Smileface-Twomoons đạt đỉnh tại $q^*=50$ so với $11$ ($s=2.13$). Do thang đo được chọn bằng cách tối đa hóa chỉ số Rand trung bình tại các tham số mặc định của bài báo, nên các đồ thị luồng tổng hợp ở Hình~15 và chỉ số Rand trung bình ở Hình~5--6 và 11--12 không được coi là bằng chứng độc lập.
+
+\noindent\textbf{Chuẩn hóa dữ liệu.} Tại giá trị $q$ của bài báo, chúng tôi tính toán $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ trên khối (chunk) đầu tiên cho từng phương án chuẩn hóa ứng viên, vì Mục~4.4.2 của bài báo yêu cầu $q$ phải lớn hơn nhẹ so với $1/\max\|\mathbf{x}_i-\mathbf{x}_j\|^2$, và loại bỏ những phương án chuẩn hóa khiến hầu như mọi giá trị nhân đều bằng $0$ hoặc $1$. Trên KDD CUP'99, chỉ có phương pháp online z-score đưa tích này về gần 1 ($0.99$). Trên CoverType, chỉ có min-max giữ lại được giá trị hàm nhân sử dụng được (với các phương pháp khác, hơn 99\% giá trị hàm nhân xấp xỉ $0$), nhưng tích của nó lên tới $27.6$, do đó hàm nhân vẫn còn quá hẹp: đây là lựa chọn ít tệ nhất thay vì một phương án thực sự thỏa mãn tiêu chí (Mục~\ref{sec:issues}, B4). Việc lựa chọn này hoàn toàn chỉ dựa trên thống kê hàm nhân, không sử dụng chỉ số Rand.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{calibration.png}
+  \vspace{-14pt}
+  \caption{Hiệu chuẩn. (a, b) Chỉ số Rand khi quét $q$ trên các luồng tổng hợp chưa co giãn: đường đứt nét là $q$ tốt nhất; đường chấm là $q$ của bài báo dưới thang đo đã chọn. (c) Tỷ lệ các cặp điểm lấy mẫu có giá trị hàm nhân mang thông tin tại giá trị $q$ của bài báo ứng với từng phương án chuẩn hóa; các con số thể hiện $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ trên chunk đầu tiên, cột có viền đậm là phương án chuẩn hóa được chọn.}
+  \label{fig:svstream_calibration}
+\end{figure}
+
+%-----------------------------------------------------------------------
+\subsection{Kết quả Thực nghiệm và Phân tích Chi tiết}
+\label{subsec:svstream_results}
+%-----------------------------------------------------------------------
+
+Toàn bộ các hình bên dưới được tạo ra từ các thiết lập đầu vào trong Bảng~\ref{tab:svstream_inputs}. Mỗi hình đều đi kèm phần phân tích chi tiết về sự tương đồng và khác biệt so với bài báo gốc.
+
+\begin{table}[!ht]
+\centering
+\caption{Kết quả bài báo gốc vs.\ lần chạy thực nghiệm này. $^\dagger$Giá trị được dùng để hiệu chuẩn thang đo tọa độ.}
+\label{tab:comprehensive_summary}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}l L L l@{}}
+\toprule
+\textbf{Hình} & \textbf{Bài báo gốc} & \textbf{Lần chạy này} & \textbf{Khớp?} \\
+\midrule
+3 & Hai luồng tổng hợp & Tái tạo lại, co giãn theo tỷ lệ $0.943$ và $2.13$ & Đầu vào \\
+4 & $C=0.25$: 76 SV, 10 BSV, tách biệt các lớp; $C=1$: gộp thành 1 cụm & $C=0.25$: 173 SV, \textbf{0 BSV}, 8 cụm (RI chunk 0.951); $C=1$: 1 cụm (0.495) & Một phần \\
+5--6 & RI trung bình 0.9267; RI thấp chỉ ở chunk 1--2 & RI trung bình \textbf{0.9192}$^\dagger$; RI dưới 0.9 ở chunk 1--6 & Có \\
+7--10 & 53--126 SV+BSV, 3--14 BSV & 138$\to$506 SV, 0 BSV; RI chunk 0.96--1.00, hai mắt hội tụ bị gộp ở bước 70 & Một phần \\
+11--12 & RI trung bình 0.9857; 65/70 chunk $>0.95$ & RI trung bình \textbf{0.9844}$^\dagger$; 63/70 chunk $>0.95$ & Có \\
+13 & Phát hiện 82--99\%, báo động giả $<6\%$; cả hai đều tăng khi $\zeta$ và $C$ giảm và khi $q$ tăng & 13a: 0\% ở mọi cấu hình. 13b: xu hướng $\zeta$ và $C$ khớp, xu hướng $q$ bị đảo ngược; tỷ lệ phát hiện phần lớn chỉ đạt 8--34\% & Không \\
+14 & RI ổn định theo $M$ ngoại trừ trên Ring-Ball; thời gian tăng theo $M$; $<200$ SV+BSV; 12--230\,KB & RI ổn định; thời gian \emph{giảm} khi $M$ tăng; 110--874 SV+BSV; 18--181\,KB & Một phần \\
+15 & $q$ tốt nhất là $9$ (Ring-Ball), $11$ (Smileface); KDD $\approx 0.66$, CoverType $\approx 0.71$ & $q$ tốt nhất là $11$ (0.923) và $12$ (0.986)$^\dagger$; KDD 0.97--1.00; CoverType đi ngang ở 0.33 & Một phần \\
+16 & Tồn tại cực trị rõ rệt theo $C$ trên các luồng tổng hợp; CoverType tốt nhất tại $C=0.2$ & Đi ngang, hoặc dao động ngẫu nhiên không rõ xu hướng trên Ring-Ball & Không \\
+17 & Ổn định với $\delta \in [0.5, 0.6]$ và $\eta \in [0.9, 1.0]$, giảm khi $\delta$ và $\eta$ nhỏ; chọn $(0.6, 1.0)$ & Mặc định bằng hoặc cách giá trị tốt nhất trong vòng 0.002 (Ring-Ball 0.919; Smileface 0.984 so với 0.986); $\eta$ không có tác động, không có hiện tượng sụt giảm khi $\delta$ và $\eta$ nhỏ & Một phần \\
+18 & SVStream tốt nhất trên mọi luồng, bộ nhớ nhỏ nhất & Tốt nhất trên Ring-Ball và KDD; xếp sau các baseline trên Smileface chưa co giãn và CoverType & Một phần \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%--- Figure 4 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig04.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig4_ring_ball_bsv.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~4, Ring-Ball tại bước 11 với $C=0.25$ và $C=1$ (lần chạy này bổ sung thêm cấu hình $q=1$, $C=0.04$).}
+  \label{fig:comp_fig4}
+\end{figure}
+\noindent\textbf{Phân tích.} Chỉ có hiện tượng sụp đổ tại $C=1$ là tái hiện được: hai lớp bị hợp nhất thành một cụm duy nhất tương tự bài báo. Tại giá trị $C=0.25$ của bài báo, chúng tôi hoàn toàn không thu được BSV nào (173 SV, 8 cụm), mặc dù chunk dữ liệu vẫn được phân cụm tốt (RI 0.951). Nguyên nhân xuất phát từ ràng buộc hộp trong Công thức~(5): với $\sum_i \beta_i = 1$ và $\beta_i \le C$, một hình cầu chỉ có thể chứa tối đa $\lfloor 1/C \rfloor$ BSV, tức là 4 BSV tại $C=0.25$, trong khi bài báo lại hiển thị 10 BSV ở đây và 14 BSV tại $C=0.3$ (Hình~8). Do đó, tham số $C$ của tác giả nhiều khả năng đã được co giãn theo một thang khác. Khi cài đặt nguyên bản theo công thức toán học, ràng buộc hộp chỉ thực sự phát huy tác dụng khi $C$ được hạ thấp, ví dụ xuống $0.04$ (thu được 12 BSV).
+
+%--- Figures 5-6 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{paper_fig05_06.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.6cm,keepaspectratio]{fig5_6_ring_ball_rand.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~5--6, Chỉ số Rand theo từng chunk trên Ring-Ball và các chunk có kết quả kém nhất.}
+  \label{fig:comp_fig5_6}
+\end{figure}
+\noindent\textbf{Phân tích.} Chỉ số Rand trung bình rất sát với bài báo gốc (0.919 so với 0.927), tuy nhiên đây chính là giá trị mà thang đo tọa độ đã được hiệu chuẩn dựa vào. Các chunk ban đầu đều cho kết quả thấp ở cả hai bên, điều mà bài báo giải thích là do các chunk đầu tiên thưa thớt tạo ra khoảng trống giả bên trong các cụm; phía chúng tôi chỉ số duy trì dưới 0.9 trong suốt sáu chunk thay vì hai chunk. Hai hình biểu diễn chunk được tô màu theo mô hình ở cuối luồng thay vì tại bước của chính nó, đó là lý do vì sao chúng trông có vẻ chuẩn xác mặc dù các chunk này chỉ đạt điểm 0.71 và 0.70.
+
+%--- Figures 7-10 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.58\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=7cm,keepaspectratio]{paper_fig07_10.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.38\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=7cm,keepaspectratio]{fig7_10_smileface_steps.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~7--10, Smileface-Twomoons tại các bước 10, 12, 51 và 70: toàn bộ luồng đến thời điểm hiện tại, các hình cầu, và kết quả phân cụm của chunk.}
+  \label{fig:comp_fig7_10}
+\end{figure}
+\noindent\textbf{Phân tích.} Chỉ số Rand của chunk duy trì ở mức cao qua mọi bước (0.96--1.00), nhưng các cụm phân chia không hoàn toàn rõ ràng và gọn gàng như bài báo: tại bước 12, hai hình mặt trăng mới xuất hiện vẫn bị phân tách thành nhiều cụm nhỏ (0.956), và tại bước 70, hai mắt đang hội tụ lại bị gộp chung thành một cụm (0.971). Sự khác biệt nằm ở tập tóm tắt dữ liệu (summary). Vì không có BSV nào được sinh ra ở mức $C$ của bài báo (xem Hình~4), cơ chế suy giảm BSV (BSV decay) không bao giờ loại bỏ được nhiễu: các điểm nhiễu tồn tại vĩnh viễn dưới dạng SV cô lập và tập tóm tắt tăng vọt từ 138 lên 506 SV, trong khi bài báo giữ được ở mức 53 đến 126 SV+BSV và loại bỏ nhiễu dưới dạng các BSV (Hình~10a).
+
+%--- Figures 11-12 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.4cm,keepaspectratio]{paper_fig11_12.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.4cm,keepaspectratio]{fig11_12_smileface_rand.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~11--12, Chỉ số Rand theo từng chunk trên Smileface-Twomoons và 5 chunk có kết quả kém nhất.}
+  \label{fig:comp_fig11_12}
+\end{figure}
+\noindent\textbf{Phân tích.} Hình này hiện đã khớp rất sát với bài báo: RI trung bình đạt 0.984 so với 0.986 và có 63 so với 65 chunk đạt trên 0.95. Các chunk yếu nhất là chunk 1 (0.87), chunk 7 (0.92) và các chunk 65--68 (hạ xuống 0.91), thời điểm hai mắt hội tụ vào nhau. Điểm trung bình là mục tiêu hiệu chuẩn nên không phải bằng chứng độc lập, nhưng chỉ số Rand vẫn duy trì ổn định ở mức 0.98 trên mọi giá trị $M$ (Hình~14) và mọi giá trị $C$ (Hình~16), những tham số không hề được can thiệp trong quá trình hiệu chuẩn, trong khi thuật toán chạy trên luồng chưa co giãn chỉ đạt 0.762 (Hình~18). Do đó, sự chênh lệch trước đây trên luồng này chủ yếu bắt nguồn từ thang đo dữ liệu, tức là hàm nhân quá rộng so với tọa độ không gian mẫu.
+
+%--- Figure 13 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{paper_fig13.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{fig13a_outlier_detection.png}
+    \caption{13a: Lưới của bài báo}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{fig13b_outlier_detection.png}
+    \caption{13b: $C$ vùng ràng buộc hộp phát huy tác dụng}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~13, Tỷ lệ phát hiện điểm ngoại lai so với tỷ lệ báo động giả trên Smileface-Twomoons khi thay đổi $\zeta$, $C$ và $q$.}
+  \label{fig:comp_fig13}
+\end{figure}
+\noindent\textbf{Phân tích.} Trên lưới tham số của bài báo (13a), không có BSV nào xuất hiện, do đó không có điểm nào bị gán nhãn ngoại lai và mọi tỷ lệ đều bằng 0\%. Khi hạ $C$ xuống vùng mà ràng buộc hộp phát huy tác dụng (13b), việc giảm $\zeta$ và giảm $C$ làm tăng cả hai tỷ lệ, đúng như xu hướng trong bài báo, nhưng việc tăng $q$ lại làm giảm chúng, đồng thời tỷ lệ phát hiện phần lớn chỉ dao động trong khoảng 8--34\% ngoại trừ tại các điểm cực trị $C=0.010$ và $q=5$ (bài báo: 82--99\% với tỷ lệ báo động giả dưới 6\%). Chúng tôi vẫn chưa thể xác định được nguyên nhân khiến cơ chế này hành xử khác biệt một khi nó được kích hoạt.
+
+%--- Figure 14 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5cm,keepaspectratio]{paper_fig14.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5cm,keepaspectratio]{fig14_chunk_size.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~14, Chỉ số Rand trung bình, thời gian thực thi, số lượng SV và BSV, và dung lượng bộ nhớ theo kích thước khối $M$.}
+  \label{fig:comp_fig14}
+\end{figure}
+\noindent\textbf{Phân tích.} Tương tự bài báo, chỉ số Rand duy trì ổn định theo $M$, và bộ nhớ cùng bậc độ lớn (18--181\,KB so với 12--230\,KB) và cao hơn trên KDD CUP'99 so với các luồng 2 chiều; ở đây chúng tôi đo kích thước mô hình (model size) thay vì mức sử dụng bộ nhớ đỉnh (peak memory usage) như bài báo. Hai đồ thị có sự khác biệt: Thời gian chạy giảm dần khi $M$ tăng, trái ngược với bài báo là thời gian tăng theo $M$. Một lý do hợp lý là mỗi bài toán QP bị chi phối chủ yếu bởi tập tóm tắt đã lưu (khoảng 500 SV trên Smileface-Twomoons) thay vì bởi $M$ điểm mới, khiến chi phí trên mỗi chunk xấp xỉ không đổi và tổng số lượng chunk quyết định tổng thời gian; giả thuyết này hiện chưa được đo đạc chi tiết (profile). Số lượng điểm tóm tắt vượt quá ngưỡng 200 của bài báo (503--516 SV trên Smileface-Twomoons, khoảng 870 trên CoverType), bởi vì khi thiếu vắng BSV thì không có cơ chế nào dọn dẹp điểm nhiễu (Hình~7--10).
+
+%--- Figure 15 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5cm,keepaspectratio]{paper_fig15.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5cm,keepaspectratio]{fig15_kernel_width.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~15, Chỉ số Rand trung bình theo độ rộng hàm nhân $q$ trên lưới tham số của bài báo.}
+  \label{fig:comp_fig15}
+\end{figure}
+\noindent\textbf{Phân tích.} Các đồ thị dữ liệu tổng hợp duy trì rất sát với bài báo, một phần nhờ vào bước hiệu chuẩn: Ring-Ball dao động trong khoảng 0.85--0.92 (bài báo 0.85--0.93) nhưng đạt đỉnh tại $q=11$ thay vì 9, còn Smileface-Twomoons đi ngang ở mức 0.983--0.986 với đỉnh tại $q=12$ (bài báo là 11). Các điểm tối ưu không trùng khớp chính xác tuyệt đối với giá trị trong bài báo vì lượt quét hiệu chuẩn trên luồng chưa co giãn sử dụng lưới số nguyên, nên $q^*=8$ và $q^*=50$ chỉ mang tính xấp xỉ, đồng thời lưới đã co giãn khảo sát những độ rộng mà bước hiệu chuẩn chưa từng thử nghiệm. Các đồ thị dữ liệu thực không thể so sánh tương đương. Trên KDD CUP'99, chỉ số đạt 0.97--1.00 và giảm từ từ theo $q$ (bài báo $\approx 0.66$), điều này phản ánh việc lấy mẫu tiền tố 10.000 bản ghi bị chi phối bởi quá ít lớp phân loại hơn là do chất lượng phân cụm thực sự tốt. Trên CoverType, chỉ số đi ngang ở mức 0.33 với tỷ lệ phát hiện cụm bằng 0 và tập tóm tắt lên tới khoảng 870 SV (Hình~14), hoàn toàn nhất quán với một hàm nhân vẫn còn quá hẹp ngay cả sau khi chuẩn hóa min-max (Mục~\ref{subsec:svstream_calibration}). Một kiểm tra sơ bộ ngoài pipeline hình ảnh, chạy trên 30.000 bản ghi đầu tiên với chuẩn hóa min-max tính trên toàn bộ luồng, cho ra kết quả 0.52; do đó cả chiều dài luồng dữ liệu lẫn tập bản ghi dùng để tính tham số chuẩn hóa đều có thể tác động lớn; chỉ có việc chạy thực nghiệm trên toàn bộ luồng mới có thể đưa ra kết luận dứt điểm.
+
+%--- Figure 16 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig16.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig16_tradeoff_c.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~16, Chỉ số Rand trung bình theo tham số đánh đổi $C$ trên lưới tham số của bài báo.}
+  \label{fig:comp_fig16}
+\end{figure}
+\noindent\textbf{Phân tích.} Không có điểm tối ưu nào như trong bài báo xuất hiện (Ring-Ball tại $C=0.25$, Smileface-Twomoons tại $0.3$, CoverType tại $0.2$). Trong khoảng $C \in [0.1, 0.32]$, ràng buộc hộp trong Công thức~(5) thực tế hầu như không bao giờ bão hòa (Hình~4), nên $C$ không tạo ra ảnh hưởng mang tính hệ thống: Smileface-Twomoons giữ nguyên ở mức 0.980--0.986, KDD CUP'99 ở 0.986--0.987 và CoverType ở 0.328, trong khi Ring-Ball biến thiên hỗn loạn giữa 0.89 và 0.93 mà không có xu hướng cụ thể.
+
+%--- Figure 17 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{paper_fig17.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{fig17_multisphere_thresholds.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~17, Chỉ số Rand trung bình theo các ngưỡng đa cầu $\delta$ và $\eta$ (lần chạy này: chỉ thực hiện trên hai luồng tổng hợp).}
+  \label{fig:comp_fig17}
+\end{figure}
+\noindent\textbf{Phân tích.} Giống như bài báo, cấu hình mặc định $(\delta, \eta) = (0.6, 1.0)$ nằm ngay tại hoặc sát bên cạnh ô tối ưu nhất: đây là cấu hình tốt nhất trên Ring-Ball (0.919) và cách ô tối ưu không quá 0.002 trên Smileface-Twomoons (0.984 so với 0.986 tại $\delta=0.4$). Tuy nhiên, độ nhạy tham số của bài báo không tái hiện được. Mặt biểu diễn của bài báo sụt giảm xuống còn khoảng 0.4--0.7 khi cả $\delta$ và $\eta$ cùng nhỏ, trong khi ở đây $\eta$ hoàn toàn không có tác dụng (mọi hàng trong biểu đồ nhiệt đều đồng nhất) và $\delta$ chỉ làm thay đổi chỉ số Rand tối đa 0.03 (Ring-Ball giảm xuống 0.89 tại $\delta = 0.4$--$0.5$). Một nguyên nhân khả dĩ là kiểm thử gộp cầu hiếm khi hoặc không bao giờ được chạm tới: $\eta$ chỉ có ý nghĩa một khi tồn tại từ hai hình cầu trở lên, trong khi Hình~7--10 cho thấy chỉ có duy nhất một hình cầu tại mỗi bước. Số lượng hình cầu theo từng bước hiện chưa được ghi nhận (log). Khung benchmark chỉ chạy hai luồng tổng hợp nên đồ thị KDD CUP'99 và CoverType của bài báo không được tái hiện.
+
+%--- Figure 18 ---
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{paper_fig18.png}
+    \caption{Bài báo gốc}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{fig18_algorithm_comparison.png}
+    \caption{Lần chạy này}
+  \end{subfigure}
+  \vspace{-6pt}
+  \caption{Hình~18, Chỉ số Rand, thời gian thực thi và bộ nhớ so với các baseline trong River, với thiết lập giữ nguyên của Hình~18 (luồng tổng hợp chưa co giãn, tiền tố 10.000 bản ghi dữ liệu thực).}
+  \label{fig:comp_fig18}
+\end{figure}
+\noindent\textbf{Phân tích.} SVStream đạt điểm cao nhất trên Ring-Ball (0.918 so với tối đa 0.60 của các thuật toán khác) và trên KDD CUP'99 (0.982), tuy nhiên cả hai đều không phải là bằng chứng vững chắc: các baseline chạy với tham số River chưa tinh chỉnh (trong khi bài báo ghi nhận RepStream đạt 0.86 trên Ring-Ball), và đoạn tiền tố KDD bị chi phối bởi quá ít lớp. SVStream tụt lại phía sau trên Smileface-Twomoons (0.762, đứng sau CluStream, DenStream và STREAMKMeans) và đứng cuối trên CoverType (0.328). Kết quả trên Smileface-Twomoons là do hình này giữ luồng dữ liệu chưa co giãn; ở thang đo đã hiệu chuẩn, SVStream đạt tới 0.984 (Hình~11--12). SVStream chỉ có dung lượng bộ nhớ nhỏ nhất trên Ring-Ball; DenStream nhỏ hơn trên cả ba luồng còn lại. Phép so sánh này cũng khác với bài báo do các mô hình đối chuẩn (các bản cài đặt trong River, không có StrAP, tham số $\varepsilon$ của DenStream được co giãn lại theo dữ liệu), việc triển khai bằng Python, và cách định nghĩa chỉ số bộ nhớ.
+
+\takeaway{Chỉ có các tham số đầu vào là có thể tuân theo bài báo một cách tuyệt đối; các luồng dữ liệu tổng hợp chỉ có thể được tái tạo và co giãn lại thang đo, và các luồng dữ liệu thực ở đây là các mẫu lấy 10.000 bản ghi tiền tố. Khi thang đo tọa độ được hiệu chuẩn, Smileface-Twomoons và Ring-Ball tiệm cận rất sát chất lượng phân cụm của bài báo, tuy nhiên cơ chế BSV trong Công thức~(5) không bao giờ kích hoạt tại giá trị $C$ của bài báo, do đó việc phát hiện ngoại lai, nghiên cứu độ nhạy $C$ và kích thước tập tóm tắt vẫn còn khác biệt đáng kể so với bài báo gốc.}

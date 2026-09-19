@@ -1,6 +1,20 @@
 %=======================================================================
 \section{Issues \& Blockers}
+\label{sec:issues}
 %=======================================================================
 
-% [BLANK]
-\noindent\textit{[No major blockers encountered during Weeks 2--3]}
+The reproduction of SVStream (Section~\ref{sec:svstream_reproduction}) has revealed several unresolved issues. These are common problems encountered when implementing other algorithms (SVStream serves merely as an illustrative case study).
+
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=2.2em,itemsep=8pt]
+  \item \textbf{Algorithm Reproduction and Implementation Anomalies}\\
+  The core mechanisms of the reimplemented algorithm do not behave as described in the paper, indicating either missing technical details or misinterpreted formulas like Mechanism and parameter failures, Inert components.
+  
+
+  \item \textbf{Limitations in Test Data and Evaluation Methodology}\\
+  The algorithm's benchmarking currently lacks objectivity and integrity due to missing original data and unfair experimental setups:
+  \begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=2pt]
+    \item \textbf{Lack of original data:} The synthetic datasets (e.g., Ring-Ball, Smileface-Twomoons) were never released by the authors, making exact reproduction impossible.
+    \item \textbf{Practical resource constraints:} Processing full real data streams takes tens of hours, so current evaluations rely on 10,000-record samples, rendering the resulting Rand indices uninformative.
+    \item \textbf{Unfair comparisons:} The baseline models used for comparison rely on untuned settings, which violates the fair-comparison goal of the research methodology.
+  \end{itemize}
+\end{enumerate}

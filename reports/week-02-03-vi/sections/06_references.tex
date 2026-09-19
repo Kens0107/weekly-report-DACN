@@ -2,33 +2,74 @@
 \section{Tài liệu Tham khảo \& Liên kết}
 %=======================================================================
 
-\subsection*{Mã nguồn phát triển trong Tuần 2--3}
+\subsection*{Mã nguồn phát triển trong kỳ báo cáo này}
 \begin{table}[H]
 \centering
 \small
 \begin{tabularx}{\textwidth}{@{}l L l@{}}
 \toprule
-\textbf{Mã module} & \textbf{Mô tả chi tiết} & \textbf{Liên kết kho mã} \\
+\textbf{Mã module} & \textbf{Mô tả chi tiết} & \textbf{Liên kết} \\
 \midrule
-Module 1 & Pipeline và Bộ chỉ số đánh giá (ARI, NMI, Silhouette, v.v.) & \evi{\RepoURL/tree/main/metrics}{metrics/river\_eval} \\
-Module 2 & Triển khai các thuật toán phân cụm luồng (nền tảng \& mở rộng) & \evi{\RepoURL/tree/main/algorithms}{algorithms/stream\_models} \\
-Module 3 & Khung kiểm thử siêu tham số (Relative LODO Benchmark) & \evi{\RepoURL/tree/main/benchmarks}{benchmarks/relative\_lodo} \\
+Module 1 & Thiết lập pipeline và Bộ chỉ số đánh giá (ARI, NMI, Silhouette, v.v.) & \TodoMark{link} \\
+Module 2 & Triển khai các thuật toán phân cụm luồng (nền tảng \& khám phá) & \TodoMark{link} \\
+Module 3 & Khung kiểm thử siêu tham số (Relative LODO Benchmark) & \TodoMark{link} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection*{Tài liệu tham khảo học thuật}
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \small
 \bibitem{cerqueira2026framework}
 V.~Cerqueira, H.~M.~Gomes, M.~Heyden, B.~Pfahringer, and A.~Bifet,
 \newblock ``A Framework for Evaluating and Benchmarking Concept Drift Detection Methods,''
-\newblock in \emph{Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26)}, 2026.
-\newblock arXiv:\href{https://arxiv.org/abs/2606.07789}{2606.07789}.
+\newblock in \emph{Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2 (KDD '26)}, Association for Computing Machinery, 2026.
+\newblock DOI: \href{https://doi.org/10.1145/3770855.3819070}{10.1145/3770855.3819070}.
+
+\bibitem{franceschi2024hyperparameter}
+L.~Franceschi, M.~Donini, V.~Perrone, A.~Klein, C.~Archambeau, M.~Seeger, M.~Pontil, and P.~Frasconi,
+\newblock ``Hyperparameter Optimization in Machine Learning,''
+\newblock \emph{arXiv preprint arXiv:2410.22854v3}, 2024.
+\newblock DOI: \href{https://doi.org/10.48550/arXiv.2410.22854}{10.48550/arXiv.2410.22854}.
 
 \bibitem{fan2020hyperparameter}
 X.~Fan, Y.~Yue, P.~Sarkar, and Y.~X.~R.~Wang,
 \newblock ``On Hyperparameter Tuning in General Clustering Problems,''
-\newblock in \emph{Proceedings of the 37th International Conference on Machine Learning (ICML 2020)}, PMLR 119, pp.~2965--2975, 2020.
-\newblock URL: \href{http://proceedings.mlr.press/v119/fan20b.html}{proceedings.mlr.press/v119/fan20b.html}.
+\newblock in \emph{Proceedings of the 37th International Conference on Machine Learning (ICML 2020)}, PMLR 119, pp.~2996--3007, 2020.
+\newblock URL: \href{https://proceedings.mlr.press/v119/fan20b.html}{proceedings.mlr.press/v119/fan20b.html}.
+
+\bibitem{zhang1996birch}
+T.~Zhang, R.~Ramakrishnan, and M.~Livny,
+\newblock ``BIRCH: An Efficient Data Clustering Method for Very Large Databases,''
+\newblock in \emph{Proceedings of the 1996 ACM SIGMOD International Conference on Management of Data}, pp.~103--114, Association for Computing Machinery, 1996.
+\newblock DOI: \href{https://doi.org/10.1145/233269.233324}{10.1145/233269.233324}.
+
+\bibitem{ismael2014improvedbirch}
+N.~Ismael, M.~Alzaalan, and W.~Ashour,
+\newblock ``Improved Multi Threshold Birch Clustering Algorithm,''
+\newblock \emph{International Journal of Artificial Intelligence and Applications for Smart Devices}, vol.~2, no.~1, pp.~1--10, 2014.
+\newblock DOI: \href{https://doi.org/10.14257/ijaiasd.2014.2.1.01}{10.14257/ijaiasd.2014.2.1.01}.
+
+\bibitem{luhr2009repstream}
+S.~L{\"u}hr and M.~Lazarescu,
+\newblock ``Incremental Clustering of Dynamic Data Streams Using Connectivity Based Representative Points,''
+\newblock \emph{Data \& Knowledge Engineering}, vol.~68, no.~1, pp.~1--27, 2009.
+\newblock DOI: \href{https://doi.org/10.1016/j.datak.2008.08.006}{10.1016/j.datak.2008.08.006}.
+
+\bibitem{isaksson2012sostream}
+C.~Isaksson, M.~H.~Dunham, and M.~Hahsler,
+\newblock ``SOStream: Self Organizing Density-Based Clustering over Data Stream,''
+\newblock in \emph{Machine Learning and Data Mining in Pattern Recognition}, Lecture Notes in Computer Science, vol.~7376, pp.~264--278, Springer, 2012.
+\newblock DOI: \href{https://doi.org/10.1007/978-3-642-31537-4_21}{10.1007/978-3-642-31537-4\_21}.
+
+\bibitem{wang2013svstream}
+C.-D.~Wang, J.-H.~Lai, D.~Huang, and W.-S.~Zheng,
+\newblock ``SVStream: A Support Vector-Based Algorithm for Clustering Data Streams,''
+\newblock \emph{IEEE Transactions on Knowledge and Data Engineering}, vol.~25, no.~6, pp.~1410--1424, 2013.
+\newblock DOI: \href{https://doi.org/10.1109/TKDE.2011.263}{10.1109/TKDE.2011.263}.
+
+\bibitem{benhur2001svc}
+A.~Ben-Hur, D.~Horn, H.~T.~Siegelmann, and V.~Vapnik,
+\newblock ``Support Vector Clustering,''
+\newblock \emph{Journal of Machine Learning Research}, vol.~2, pp.~125--137, 2001.
 \end{thebibliography}

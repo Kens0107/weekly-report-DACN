@@ -1,69 +1,64 @@
 %=======================================================================
 \section{Các Công việc Đã Hoàn thành}
+\label{sec:completed}
 %=======================================================================
 
 \begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=2.2em]
-  \item \textbf{Cài đặt River và thiết lập framework chạy pipeline} \hfill{\small(Giai đoạn 1 \& 2)}\\
+  \item \textbf{Thiết lập Pipeline River và Tích hợp Bộ Chỉ số Đánh giá} \hfill{\small(Giai đoạn 1 \& 2)}\\
   \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
-    \item Cài đặt thư viện River và tìm hiểu, xây dựng một repo/framework thống nhất để chạy pipeline, giúp việc vận hành thư viện River cũng như tích hợp và kiểm thử các thuật toán dễ dàng, thuận tiện hơn.
-    \item Đã cài đặt bổ sung và viết hàm gọi đầy đủ các metrics đánh giá từ River và scikit-learn:
+    \item Đã cài đặt River và xây dựng một khung thực thi pipeline thống nhất nhằm tối ưu hóa việc vận hành mô hình luồng, đánh giá và tích hợp thuật toán.
+    \item Đã triển khai và đóng gói đầy đủ các chỉ số đánh giá phân cụm tương thích trực tiếp với các luồng dữ liệu của River:
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \textbf{Metrics ngoại vi (External):} ARI (Adjusted Rand Index), NMI (Normalized Mutual Information), AMI (Adjusted Mutual Information), Purity, Rand (RI).
-      \item \textbf{Metrics nội tại (Internal):} Silhouette, SSQ/SSE (Sum of Squared Errors), Davies--Bouldin, Calinski--Harabasz.
+      \item \textbf{Chỉ số ngoại vi (External metrics):} Adjusted Rand Index (ARI), Normalized Mutual Information (NMI), Adjusted Mutual Information (AMI), Purity, Rand Index (RI).
+      \item \textbf{Chỉ số nội tại (Internal metrics):} Hệ số Silhouette, Tổng bình phương sai số (SSQ/SSE), Chỉ số Davies--Bouldin (DB), Chỉ số Calinski--Harabasz (CH).
     \end{itemize}
   \end{itemize}
 
-  \item \textbf{Triển khai các thuật toán phân cụm luồng và chiến lược thực hiện} \hfill{\small(Giai đoạn 3)}\\
+  \item \textbf{Triển khai Thuật toán Phân cụm Luồng và Chiến lược Ưu tiên} \hfill{\small(Giai đoạn 3)}\\
   \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
-    \item Đã triển khai 10 thuật toán trong tuần qua:
+    \item Đã viết mã nguồn cho 10 thuật toán phân cụm luồng. Các thuật toán này hiện chưa được kiểm chứng đối chiếu toàn diện với bài báo gốc; SVStream là thuật toán đầu tiên đang trong quá trình kiểm chứng (Mục~\ref{sec:svstream_reproduction}).
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \textbf{Nhóm thuật toán quan trọng, nền tảng và phổ biến:} DStream, HPStream, Birch, RepStream, SVstream.
-      \item \textbf{Nhóm thuật toán mở rộng:} DDStream, MrStream, DCUstream, improved\_Birch, SOStream.
+      \item \textbf{Nhóm nền tảng, chuẩn mực và được trích dẫn rộng rãi:} DStream, HPStream, Birch~\cite{zhang1996birch}, RepStream~\cite{luhr2009repstream}, SVstream~\cite{wang2013svstream}. Birch vốn là phương pháp duyệt một lượt (one-pass) cho tập dữ liệu tĩnh kích thước lớn thay vì thuật toán phân cụm luồng thuần túy; thuật toán này được giữ lại làm baseline về cây CF mà các phương pháp luồng (như CluStream) kế thừa và phát triển.
+      \item \textbf{Mô hình khám phá/khác:} DDStream, MrStream, DCUstream, improved\_Birch~\cite{ismael2014improvedbirch}, SOStream~\cite{isaksson2012sostream}.
     \end{itemize}
-    \item \textbf{Chiến lược triển khai:} Chốt kế hoạch ưu tiên thực hiện các thuật toán quan trọng trước vì đây là những thuật toán nền tảng, đồng thời các thí nghiệm và cơ sở lý thuyết trong các bài báo gốc được thực hiện bài bản, chuẩn chỉnh $\rightarrow$ rất phù hợp để verify khi re-implement. Ngược lại, các thuật toán khác có thí nghiệm chứa nhiều nghi vấn về độ chính xác và mô tả thuật toán chưa rõ ràng.
+    \item \textbf{Chiến lược Triển khai:} Ưu tiên các thuật toán nền tảng vì chúng được trích dẫn nhiều, đặc tả thuật toán rõ ràng và có các thí nghiệm bài bản để đối chiếu mã nguồn. Mục~\ref{sec:svstream_reproduction} chỉ ra rằng ngay cả với nhóm này, việc tái lập chính xác 100\% cũng gặp nhiều hạn chế (dữ liệu không được công bố, đồ thị thiếu trục tọa độ, tham số mô tả mơ hồ); do đó, mỗi bản cài đặt cần được kiểm chứng đối chiếu kỹ lưỡng theo từng hình ảnh thí nghiệm trước khi được tính là hoàn tất.
   \end{itemize}
 
-  \item \textbf{Thảo luận và nghiên cứu về Hyperparameter Benchmark cho Phân cụm Luồng} \hfill{\small(Phương pháp luận)}\\
+  \item \textbf{Nghiên cứu về Phương pháp luận Benchmark Siêu tham số cho Phân cụm Luồng} \hfill{\small(Phương pháp luận)}\\
   \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
-    \item \textbf{Thực trạng:}
+    \item \textbf{Thực trạng \& Thách thức:}
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \emph{Vấn đề Overfitting:} Đa số thuật toán phân cụm (đặc biệt cho data stream) báo cáo tham số được "tune" riêng trên dataset của tác giả. Khi benchmark trên dữ liệu khác, thuật toán suy giảm hiệu suất hoặc tiêu tốn thời gian/RAM ngoài dự kiến.
-      \item \emph{Thiếu công bằng trong so sánh:} Cerqueira et al.~\cite{cerqueira2026framework} chỉ ra việc chọn tham số cảm tính hoặc "tune" trên chính tập test gây sai lệch kết quả.
-      \item \emph{Mục tiêu cốt lõi:} Khi benchmark, cần tìm "bộ tham số hoạt động khách quan trên nhiều dataset" thay vì "bộ tham số tốt nhất cho một dataset".
+      \item \emph{Vấn đề Quá khớp (Overfitting):} Hầu hết các tài liệu khoa học công bố các siêu tham số được tinh chỉnh thủ công riêng trên các tập dữ liệu do chính tác giả lựa chọn. Khi chạy benchmark trên các tập dữ liệu khác, hiệu năng suy giảm nghiêm trọng hoặc xuất hiện hiện tượng tăng vọt đột biến về thời gian chạy/bộ nhớ RAM. Trong học máy tổng quát, tối ưu hóa siêu tham số (HPO) đóng vai trò then chốt để xác định cấu hình hoạt động tối ưu và bền bỉ~\cite{franceschi2024hyperparameter}.
+      \item \emph{So sánh Thiếu công bằng:} Việc lựa chọn tham số theo cảm tính (heuristic) hoặc tinh chỉnh trên chính tập dữ liệu kiểm thử tạo ra độ chệch đánh giá (evaluation bias), như đã được chỉ ra đối với các bộ phát hiện trôi dạt khái niệm trong~\cite{cerqueira2026framework}; chúng tôi nhận thấy điều tương tự cũng tồn tại trong phân cụm.
+      \item \emph{Mục tiêu Cốt lõi:} Xác định cấu hình siêu tham số có khả năng hoạt động ổn định và khách quan trên nhiều tập dữ liệu đa dạng, thay vì tìm kiếm bộ tham số chỉ tối ưu cục bộ trên một tập dữ liệu đơn lẻ.
     \end{itemize}
 
-    \item \textbf{Hướng tham chiếu - Leave-one-dataset-out (LODO):}
+    \item \textbf{Ý tưởng Tham khảo - Leave-One-Dataset-Out (LODO):} được đề xuất trong~\cite{cerqueira2026framework} dành cho benchmark các phương pháp phát hiện trôi dạt khái niệm, vốn chưa phải là quy trình chuẩn tắc cho bài toán phân cụm; chúng tôi đã vận dụng và điều chỉnh phương pháp này.
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \emph{Cơ chế (Cerqueira et al.~\cite{cerqueira2026framework}):} Dùng $n-1$ dataset để tìm cấu hình (random search tối ưu) và 1 dataset còn lại để đánh giá. Giúp bộ tham số độc lập với tập test, tăng độ bền vững.
-      \item \emph{Ưu điểm:} Tổng quát cho mọi thuật toán; đánh giá được nhiều cấu hình; dễ hiểu và đảm bảo tính tái lập.
-      \item \emph{Nhược điểm:} Tốn nhiều thời gian tính toán; không gian tìm kiếm quá lớn; random search nặng tính may rủi thay vì hiểu bản chất thuật toán.
-      \item \emph{Hạn chế chí mạng với Clustering:} LODO chuẩn thất bại vì tham số tuyệt đối (như $\epsilon$) không mang cùng ý nghĩa khi áp chéo giữa các dataset khác biệt về số chiều, thang đo và cấu trúc (ví dụ: KDD99 có 23 cụm, Shuttle có 2 cụm). Không có một mức tham số tĩnh nào thỏa mãn được mọi dataset.
+      \item \emph{Cơ chế:} Sử dụng $n-1$ tập dữ liệu để tìm kiếm cấu hình tối ưu (thông qua tìm kiếm ngẫu nhiên - random search) và đánh giá trên tập dữ liệu giữ lại còn lại. Giúp quá trình tinh chỉnh hoàn toàn độc lập với dữ liệu kiểm thử.
+      \item \emph{Ưu điểm:} Không phụ thuộc vào mô hình (model-agnostic), khảo sát được không gian tham số rộng, trực quan, đảm bảo tính tái lập.
+      \item \emph{Nhược điểm:} Chi phí tính toán rất lớn, không gian tìm kiếm khổng lồ, phụ thuộc nhiều vào yếu tố may rủi hơn là tri thức miền chuyên sâu.
+      \item \emph{Hạn chế đối với Phân cụm (quan sát của chúng tôi, không trích xuất từ tài liệu đã xuất bản):} LODO tiêu chuẩn gặp thất bại vì các tham số tĩnh tuyệt đối (ví dụ: $\epsilon$ cố định) không mang ý nghĩa hình học nhất quán giữa các tập dữ liệu có số chiều, thang đo và số lượng cụm khác biệt lớn (ví dụ: KDD99 có 23 cụm so với Shuttle chỉ có 2 cụm). Không thể tồn tại một giá trị tĩnh tuyệt đối nào phù hợp cho mọi trường hợp.
     \end{itemize}
 
-    \item \textbf{Đề xuất giải pháp - LODO có chủ đích với tham số tương đối:}
+    \item \textbf{Đề xuất của Chúng tôi - LODO có Chủ đích với Tham số Tương đối} (chưa đánh giá thực nghiệm):
     \begin{enumerate}[label=(\alph*),leftmargin=1.4em,itemsep=2pt]
-      \item \textbf{Chỉ tinh chỉnh (tune) các tham số "khóa":} Chỉ chọn 1--2 tham số ảnh hưởng trực tiếp đến cấu trúc và số lượng cụm, giữ mặc định các tham số còn lại tuỳ theo họ thuật toán:
+      \item \textbf{Chỉ Tinh chỉnh Tham số Trọng yếu:} Tập trung duy nhất vào 1--2 tham số then chốt (hoặc nhiều hơn tùy thuật toán) ảnh hưởng trực tiếp đến cấu trúc cụm và độ phân giải:
       \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-        \item \emph{Centroid (KMeans...):} $k$ (quyết định số cụm).
-        \item \emph{Mật độ (DenStream...):} $\epsilon$, \texttt{clustering\_threshold} (bán kính micro-cluster và điều kiện gộp/tách).
-        \item \emph{Lưới (DStream):} \texttt{grid\_width} (mật độ điểm tối thiểu để thành cụm).
-        \item \emph{Phân cấp (BIRCH...):} \texttt{threshold} (cách cây CF phân nhánh).
-        \item \emph{Đồ thị (RepStream):} $\alpha$ (mật độ điểm đại diện).
+        \item \emph{Dựa trên tâm (KMeans, v.v.):} $k$ (số lượng cụm).
+        \item \emph{Dựa trên mật độ (DenStream, v.v.):} $\epsilon$, \texttt{clustering\_threshold} (bán kính micro-cluster và tiêu chuẩn gộp/tách).
+        \item \emph{Dựa trên lưới (DStream, v.v.):} \texttt{grid\_width} (ngưỡng mật độ ô lưới).
+        \item \emph{Phân cấp (BIRCH, v.v.):} \texttt{threshold} (ngưỡng phân nhánh cây CF).
+        \item \emph{Dựa trên đồ thị (RepStream, v.v.):} $\alpha$ (mật độ điểm đại diện).
       \end{itemize}
-      \item \textbf{Sử dụng tham số tương đối thay vì tuyệt đối:} Tinh chỉnh hệ số của hàm số dựa trên đặc trưng thống kê riêng của từng dataset ($\text{param\_value} = f(\text{var})$):
+      \item \textbf{Sử dụng Tham số Tương đối qua Đặc trưng Thống kê Dữ liệu ($\text{param} = f(\text{stats})$):} Tinh chỉnh các hệ số co giãn tương đối thay vì các giá trị tuyệt đối tĩnh:
       \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-        \item $\epsilon = c \cdot d$ (với $d$ là khoảng cách trung vị hoặc $k$-NN trung bình).
-        \item $\text{grid\_width} = \text{range}(X) / g$ (với $g$ là số ô mỗi chiều).
-        \item $\text{threshold} = c \cdot \sigma$ (với $\sigma$ là độ lệch chuẩn trung bình các chiều).
-        \item $k$ và $\alpha$: gắn với số lớp hoặc ước lượng mode trong mẫu.
+        \item $\epsilon = c \cdot d$, với $d$ là khoảng cách trung vị từng cặp hoặc khoảng cách $k$-NN trung bình.
+        \item $\text{grid\_width} = \text{range}(X) / g$, với $g$ là số lượng phân đoạn mong muốn trên mỗi chiều.
+        \item $\text{threshold} = c \cdot \sigma$, với $\sigma$ là độ lệch chuẩn trung bình trên các chiều thuộc tính.
+        \item $k$ và $\alpha$ gắn liền với số lượng lớp hoặc ước lượng mode phân bố trong mẫu.
       \end{itemize}
-      \item \textbf{Lợi ích cốt lõi:} Dựa trên tiền lệ của Fan et al.~\cite{fan2020hyperparameter}, phương pháp này giúp một hệ số $c$ duy nhất có thể tự động co giãn theo đặc thù dữ liệu (tạo $\epsilon$ lớn cho dữ liệu thưa, nhỏ cho dữ liệu dày). Điều này loại bỏ hoàn toàn sự vô lý khi phải ép một tham số tuyệt đối dùng chung cho các dataset có cấu trúc và thang đo khác biệt (ví dụ: bộ 23 cụm và bộ 2 cụm).
+      \item \textbf{Lợi ích Cốt lõi:} Một hệ số co giãn duy nhất $c$ sẽ tự động thích ứng với mật độ dữ liệu (tạo $\epsilon$ lớn hơn cho dữ liệu thưa, nhỏ hơn cho dữ liệu dày), loại bỏ hoàn toàn nhược điểm của việc áp đặt các giá trị tuyệt đối cứng nhắc trên các tập dữ liệu không đồng nhất. Ý tưởng này chia sẻ tinh thần tương đồng với việc tinh chỉnh siêu tham số theo hướng dữ liệu trong phân cụm~\cite{fan2020hyperparameter}, nhưng bản thân phương pháp LODO với tham số tương đối là đề xuất riêng của chúng tôi và hiện chưa được đánh giá thực nghiệm.
     \end{enumerate}
   \end{itemize}
 \end{enumerate}
-
-\subsection*{Nhật ký Thời gian}
-\noindent\small
-Pipeline \& Metrics: \textbf{16h} $\cdot$ Triển khai Thuật toán: \textbf{24h} $\cdot$ Nghiên cứu Phương pháp luận Benchmark: \textbf{14h}
-\quad$\Rightarrow$\quad\textbf{Tổng cộng: 54h}.
-\normalsize\par

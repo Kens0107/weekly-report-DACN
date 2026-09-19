@@ -27,9 +27,8 @@
 \noindent
 \begin{tabularx}{\textwidth}{@{}>{\bfseries\small}l >{\small}X >{\bfseries\small}l >{\small}X@{}}
 \toprule
-Người thực hiện & \AuthorName            & Kỳ báo cáo & \WeekRange \\
-Cán bộ HD       & \MentorName            & Giai đoạn   & \PhaseName \\
-Kho lưu trữ     & \evi{\RepoURL}{github.com/user/repo} & Ngày báo cáo & \today \\
+Kỳ báo cáo   & \WeekRange & Ngày báo cáo & \today \\
+Giai đoạn    & \multicolumn{3}{l@{}}{\small \PhaseName} \\
 \bottomrule
 \end{tabularx}
 \vspace{6pt}
@@ -37,7 +36,7 @@ Kho lưu trữ     & \evi{\RepoURL}{github.com/user/repo} & Ngày báo cáo & \t
 %------------------------ REPORT SECTIONS -----------------------------
 \input{sections/01_summary.tex}
 \input{sections/02_completed.tex}
-\input{sections/03_results.tex}
+\input{sections/03_svstream_reproduction.tex}
 \input{sections/04_issues.tex}
 \input{sections/05_next_week.tex}
 \input{sections/06_references.tex}
