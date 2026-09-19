@@ -1,0 +1,37 @@
+%=======================================================================
+\section{Executive Summary}
+%=======================================================================
+\begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
+                    itemsep=4pt,topsep=2pt]
+  \item[Objective -] Turn the HPO methodology from weeks 2--3 into a working pipeline for CluStream and DenStream. Each tuning method picks \emph{one} hyperparameter set per algorithm, and we run that set on full-length datasets to see whether it beats River's defaults.
+  \item[Status -] \WIP\ \textbf{On track}
+\end{description}
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{DenStream:} tuning helps. P2R is the only method that beats the default on all three datasets, but it is about $220\times$ slower on Covertype.
+  \item \textbf{CluStream:} ARI stays below $0.025$ for every method, so ARI cannot guide its tuning. Tuned sets are only faster.
+  \item \textbf{Main issue:} the average ARI is driven by KDDCup99, and Covertype cannot be tuned at all. All results so far are in-sample with 2 seeds.
+\end{itemize}
+
+\subsection*{Progress tracker}
+
+\begin{table}[H]
+\centering
+\caption{Weekly plan versus reality, week \WeekNo.}
+\label{tab:tracker}
+\small
+\begin{tabularx}{\textwidth}{@{}L c l l@{}}
+\toprule
+\textbf{Weekly plan item} & \textbf{Phase ref.} & \textbf{Status} & \textbf{Completion} \\
+\midrule
+Define HPO protocols and search grids & P2 & \Done    & \pbar{100} \\
+Stage A: tune on 5 datasets, 50k samples each & P2 & \Done    & \pbar{100} \\
+Stage B: run chosen sets on 3 full-length datasets & P2 & \Done    & \pbar{100} \\
+Out-of-sample evaluation on 6 unseen datasets & P2 & \WIP     & \pbar{50}  \\
+Headroom-based selection and fidelity check & P2 & \Planned & \pbar{0}   \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{The pipeline runs end to end. The out-of-sample test is coded and is the priority for next week.}
+
+\noindent\textbf{Overall:} Week \WeekNo/\TotalWeeks{} - on schedule.

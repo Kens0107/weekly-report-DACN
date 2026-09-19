@@ -1,0 +1,33 @@
+%=======================================================================
+\section{Proposed Solutions \& Next Week's Plan}
+\label{sec:next}
+%=======================================================================
+
+\begin{enumerate}[label=\textbf{(\alph*)},leftmargin=2em,itemsep=3pt]
+  \item \textbf{Headroom.} Measure each method against the best score reachable on that dataset:
+  \[
+    h(d) = \frac{\text{ARI}_{\text{method}}(d) - \text{ARI}_{\text{default}}(d)}{\text{ARI}_{\text{best}}(d) - \text{ARI}_{\text{default}}(d)}.
+  \]
+  $h=1$ means as good as the best, $h=0$ means no better than the default. A dataset is untunable if $\text{ARI}_{\text{best}} < 0.05$ or $\text{ARI}_{\text{best}} - \text{ARI}_{\text{default}} < 0.02$. These thresholds are our own choice.
+  \item \textbf{Select the way we read.} Use headroom instead of raw ARI when choosing sets, and drop untunable datasets from selection. This reuses the existing 50k runs.
+  \item \textbf{Fidelity check} \cite{klein2017fabolas}. Rerun the top configurations at full length and compute the Spearman rank correlation with their 50k scores. If it is low, tune on longer streams.
+  \item \textbf{Out-of-sample test.} Run the chosen sets on 6 unseen datasets with 4 seeds, and compare each method with the default using win/tie/loss counts and a Wilcoxon test.
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Plan for week \number\numexpr\WeekNo+1\relax.}
+\label{tab:next}
+\small
+\begin{tabularx}{\textwidth}{@{}c L L c@{}}
+\toprule
+\textbf{\#} & \textbf{Task} & \textbf{Definition of done (verifiable)} & \textbf{Phase} \\
+\midrule
+N1 & Add headroom and win/tie/loss to the report & Table printed for all tuning datasets & P2 \\
+N2 & Headroom-based selection & New chosen sets computed from existing runs & P2 \\
+N3 & Fidelity check, 50k vs full length & Spearman correlation per dataset & P2 \\
+N4 & Out-of-sample evaluation & Results on 6 unseen datasets with Wilcoxon test & P2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{N1 and N2 need no new runs. N4 decides the outcome: if P2R does not beat the default on most unseen datasets, we will report that ARI-based HPO does not transfer for these algorithms.}

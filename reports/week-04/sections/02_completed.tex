@@ -1,0 +1,60 @@
+%=======================================================================
+\section{Completed Tasks}
+%=======================================================================
+\begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=2.2em]
+  %---------------------------------------------------------------------
+  \item \textbf{HPO protocols and their theory} \hfill{\small P2}
+
+  We run every candidate configuration once and store the scores in one matrix, then read it in different ways \cite{franceschi2024hpo}. Let $\bar M[\lambda, d]$ be the ARI of configuration $\lambda$ on dataset $d$, averaged over seeds. The protocols differ only in what they may see when choosing $\lambda$.
+
+  \begin{itemize}[leftmargin=1.2em,itemsep=3pt,topsep=2pt]
+    \item \textbf{Default:} River's constructor defaults. No selection.
+
+    \item \textbf{Arm 1:} the set with the best average ARI over all datasets, $\lambda^\star = \arg\max_{\lambda} \frac{1}{|D|}\sum_{d}\bar M[\lambda,d]$.
+
+    \item \textbf{Arm 2, leave-one-dataset-out (LODO)} \cite{cerqueira2026framework}. For each held-out dataset $d$, choose on the others and score on $d$:
+    \[
+      \lambda^\star_{-d} = \arg\max_{\lambda} \frac{1}{|D|-1}\sum_{d'\neq d}\bar M[\lambda,d'],
+      \qquad
+      \text{score}_{\text{LODO}}(d) = \bar M[\lambda^\star_{-d}, d].
+    \]
+    The final set is the one chosen by the most rounds. The gap between the in-sample score and the LODO score measures how optimistic a method is.
+
+    \item \textbf{Arm 3, relative parameters.} We do not scale the data, so a fixed $\varepsilon$ means different things on different datasets. Following \cite{fan2020hyperparameter}, we tune a unit-free factor $c$ and set
+    \[
+      \varepsilon_d = c\cdot s(D_d), \qquad q = \text{ratio}\cdot k,
+    \]
+    where $s(D)$ is the median pairwise distance on the first 5{,}000 samples. For CluStream, $q/k$ is the micro-ratio studied in \cite{aggarwal2003clustream}. Arm 3 applies LODO to this relative grid.
+
+    \item \textbf{P2R, LODO on a selection rule.} Every clustering algorithm has a granularity knob $g$, such as $k$ or $\varepsilon$, whose right value depends on the data. So instead of transferring a value of $g$, P2R transfers a rule for picking it. The shape parameters $\theta$ ($\beta,\mu$ or ratio, $t$) are chosen by LODO, and $g$ is picked again on each new dataset from a label-free curve:
+    \[
+      \hat g(d) = R\big(\{(g, \ell_g(d))\}_{g}\big).
+    \]
+
+    \item \textbf{Label-free criterion} \cite{fan2020hyperparameter}. We use the trace criterion with $\hat S_{ij} = -\lVert y_i - y_j\rVert^2$, which reduces to
+    \[
+      \ell = -2\sum_k \mathrm{WCSS}_k, \qquad \mathrm{WCSS}_k = SS_k - \frac{\lVert LS_k\rVert^2}{n_k},
+    \]
+    so it can be updated online from the cluster features $(n_k, LS_k, SS_k)$.
+
+    \item \textbf{Knee rule.} $\ell_g$ keeps rising as clusters get finer, so taking its maximum always picks the finest level. We normalise the curve to $x_g, y_g \in [0,1]$ and pick the point farthest from the line joining its two ends:
+    \[
+      \hat g = \arg\max_g \big|\, (y_G - y_1)\,x_g - y_g + y_1 \,\big|.
+    \]
+  \end{itemize}
+
+  %---------------------------------------------------------------------
+  \item \textbf{Experiment setup} \hfill{\small P2}
+  \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
+    \item \textbf{Data:} raw data, shuffled, then streamed. No scaler.
+    \item \textbf{Seeds:} sets are chosen on seed 1 and all reported scores average seeds 2 and 3, so a set cannot win by luck on one seed.
+    \item \textbf{Grids:} every value comes from the original papers \cite{aggarwal2003clustream,cao2006denstream}. DenStream requires $\beta\mu > 1$ and CluStream requires $q \ge k$.
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item CluStream: $k \in \{2,\dots,64\}$, $q \in \{50,100,200\}$ or ratio $\in \{2,5,10\}$, $t \in \{1,2,4\}$.
+      \item DenStream: $\varepsilon \in \{0.02,\dots,16\}$ or $c \in \{0.05,\dots,3.2\}$,\\ $\mu \in \{2,5,10,20\}$, $\beta \in \{0.2,0.5,0.75\}$.
+    \end{itemize}
+    \item \textbf{Stage A:} run all $\approx 230$ configurations on 50k samples of 5 real datasets and let each method pick one set.
+    \item \textbf{Stage B:} run the chosen sets on full KDDCup99 10\%, Covertype and INSECTS. All 46 runs finished.
+  \end{itemize}
+\end{enumerate}
+\normalsize\par

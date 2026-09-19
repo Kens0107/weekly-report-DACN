@@ -1,0 +1,15 @@
+%=======================================================================
+\section{Issues}
+%=======================================================================
+
+\paragraph{The average ARI is mostly KDDCup99.}
+When we average ARI over datasets, Arm 3 and P2R look clearly better than the default. But nearly all of that gain comes from KDDCup99. On Covertype and INSECTS both methods stay close to zero. This matters because KDDCup99 is not a fair test: without scaling, a single feature holds 99.8\% of its variance, so doing well on it mostly means cutting one axis at the right place. We plan to score each dataset against its own best possible result instead of using raw ARI (Section~\ref{sec:next}). We would like the mentors' opinion on whether this is a reasonable way to report the results.
+
+\paragraph{Some datasets cannot be tuned at all.}
+Even when we pick the best configuration for Covertype using its labels, ARI only reaches $0.018$. CluStream is worse: its best ARI on any dataset is $0.032$. So the problem is not the tuning method; nothing in the search space works on these cases. Keeping them in the selection step only adds noise. We will mark them as untunable and leave them out of selection, while keeping the decision not to scale the data.
+
+\paragraph{The full-length results are still in-sample.}
+The three datasets in Stage B were also used to choose the sets, and we only have two seeds, so the numbers are optimistic. We also have not checked that 50k samples rank configurations the same way full streams do; so far this holds for the five chosen sets, which is too few to be sure. The out-of-sample test and a fidelity check should settle both points.
+
+\paragraph{P2R is expensive.}
+P2R picks a smaller $\varepsilon$ and keeps many more micro-clusters, which makes it about $220\times$ slower than the default on Covertype. Arm 3 is much cheaper but fails on Covertype. We will report both as two options on the quality--cost trade-off, and we would like guidance on how much extra cost is acceptable for a recommended set.
