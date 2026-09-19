@@ -26,10 +26,15 @@
     \]
     where $s(D)$ is the median pairwise distance on the first 5{,}000 samples. For CluStream, $q/k$ is the micro-ratio studied in \cite{aggarwal2003clustream}. Arm 3 applies LODO to this relative grid.
 
-    \item \textbf{P2R, LODO on a selection rule.} Every clustering algorithm has a granularity knob $g$, such as $k$ or $\varepsilon$, whose right value depends on the data. So instead of transferring a value of $g$, P2R transfers a rule for picking it. The shape parameters $\theta$ ($\beta,\mu$ or ratio, $t$) are chosen by LODO, and $g$ is picked again on each new dataset from a label-free curve:
-    \[
-      \hat g(d) = R\big(\{(g, \ell_g(d))\}_{g}\big).
-    \]
+    \item \textbf{P2R, LODO on a selection rule.} Every clustering algorithm has one knob that sets how many clusters it finds: $k$ for CluStream, $\varepsilon$ for DenStream. We call it the granularity $g$. The right $g$ depends on the data, so a value tuned on other datasets rarely fits a new one. P2R therefore handles the two kinds of parameters differently:
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item The other parameters $\theta$, such as $\beta$ and $\mu$, are chosen by LODO as usual.
+      \item $g$ is not carried over. On each new dataset we run every level of $g$, score each run with a criterion that needs no labels, and pick a level from the resulting curve:
+      \[
+        \hat g(d) = R\big(\{(g, \ell_g(d))\}_{g}\big).
+      \]
+    \end{itemize}
+    In short, LODO hands over a value, while P2R hands over a way of choosing the value. For DenStream, the same rule picked $c = 0.8$ on KDDCup99, $0.2$ on Covertype and $0.4$ on INSECTS.
 
     \item \textbf{Label-free criterion} \cite{fan2020hyperparameter}. We use the trace criterion with $\hat S_{ij} = -\lVert y_i - y_j\rVert^2$, which reduces to
     \[
