@@ -4,28 +4,29 @@
 \begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
                     itemsep=4pt,topsep=2pt]
   \item[Objective -] Installed River and setup the environment, running some tests for validation, implement foundational algorithms, created a customizable framework for benchmarking and evaluating every clustering algorithms. The framework combines every internal/external metrics that is necessary for comprehensive evaluation and formulate an objective hyperparameter benchmarking methodology.
-  \item[Status -] \Done\ \textbf{Ahead of Schedule}
+  \item[Status -] \WIP\ \textbf{Implementation ahead of schedule; verification against the papers in progress}
 \end{description}
 
 \subsection*{Progress Tracker}
 
 \begin{table}[H]
 \centering
-\caption{Comparison between Proposal Schedule and Actual Progress (Weeks 2 \& 3).}
+\caption{Comparison between the proposal schedule and the actual progress in this reporting period.}
 \label{tab:tracker}
-\small
-\begin{tabularx}{\textwidth}{@{}l L L c c@{}}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.9cm} >{\raggedright\arraybackslash}p{2.6cm} L c c@{}}
 \toprule
-\textbf{Phase / Week} & \textbf{Proposal Milestone} & \textbf{Actual Reality (Weeks 2--3)} & \textbf{Status} & \textbf{Completion} \\
+\textbf{Phase / Week} & \textbf{Proposal Milestone} & \textbf{Actual Progress} & \textbf{Status} & \textbf{Completion} \\
 \midrule
-P1.2 (Week 2) & Study River algorithms & Installed River and setup the environment, running some tests for validation, explored framework \& pipeline setup & \Done & \pbar{100} \\
-P2.1 (Week 3) & Created a benchmark framework & Implemented 9 metrics (ARI, NMI, AMI, Purity, RI, Silhouette, SSQ, DB, CH) and register every algorithms& \Done & \pbar{100} \\
-P3.1 (Weeks 6--7) & Implement 1st algorithm group (early) & Implemented 10 algorithms (5 foundational + 5 exploratory) & \Done & \pbar{100} \\
-Strategic Plan & Roadmap alignment & Prioritized foundational algorithms with sound theory/experiments & \Done & \pbar{100} \\
-Methodology & Benchmark design & Researched LODO framework~\cite{cerqueira2026framework} \& proposed Relative Parameter LODO~\cite{fan2020hyperparameter} & \Done & \pbar{100} \\
+P1.2 (Week 2) & Study River algorithms & Installed River, set up the environment, ran validation tests, explored the framework and pipeline & \Done & \pbar{100} \\
+P2.1 (Week 3) & Create a benchmark framework & 9 metrics (ARI, NMI, AMI, Purity, RI, Silhouette, SSQ, DB, CH), all algorithms registered; static metrics only, none yet measures adaptability to drift & \WIP & -- \\
+Week 4 & Synthetic datasets with concept drift & Not started; the only synthetic streams so far re-create SVStream's Ring-Ball and Smileface-Twomoons & \Planned & -- \\
+P3.1 (Weeks 6--7) & Implement 1st algorithm group (early) & Code of 10 algorithms written (5 foundational + 5 exploratory); SVStream partially reproduced: clustering matches on the synthetic streams, the BSV mechanism does not (Section~\ref{sec:svstream_reproduction}); the other nine unverified & \WIP & -- \\
+Strategic Plan & Roadmap alignment & Foundational algorithms prioritized for verification & \Done & \pbar{100} \\
+Methodology & Benchmark design & LODO idea adapted from drift-detection benchmarking~\cite{cerqueira2026framework}; Relative-Parameter LODO proposed (ours, not yet evaluated) & \WIP & -- \\
 \bottomrule
 \end{tabularx}
 \end{table}
-\takeaway{Core pipeline setup and evaluation metrics are complete. Algorithm implementation and benchmark methodology formulation are substantially ahead of the original proposal schedule.}
+\takeaway{The pipeline and metrics are in place and the code of all ten algorithms is written, ahead of the proposal. Verification is behind it: SVStream reproduces the paper's clustering quality but not its bounded-support-vector mechanism, the other nine algorithms are unverified, and the drift datasets and adaptability metrics have not been started.}
 
-\noindent\textbf{Overall:} Weeks 2--3/\TotalWeeks{} - ahead of schedule.
+\noindent\textbf{Overall:} Week \WeekNo/\TotalWeeks{}: implementation ahead of schedule; verification and the drift-related milestones are pending.

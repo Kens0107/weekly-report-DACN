@@ -13,7 +13,9 @@ We reproduced the experimental study of SVStream~\cite{wang2013svstream} (Figure
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
   \item \textbf{Ring-Ball and Smileface-Twomoons cannot match the paper exactly} (Figure~3 and every figure that uses them). The data were never released and the paper's figures have no axes, so guessing coordinates by eye would not make the input closer to the paper, only more arbitrary. We keep what the paper states (sizes, classes, noise ratio, order of the phases) and calibrate the coordinate scale \emph{once} against the best $q$ of the paper's Figure~15 (Section~\ref{subsec:svstream_calibration}). Matching them exactly would require the data from the authors.
   \item \textbf{The normalisation of the real streams is not stated in the paper.} It is chosen by the same one-off calibration and recorded explicitly.
-  \item \textbf{KDD CUP'99 and Forest CoverType are sampled.} This run uses the first 10,000 records of each stream in every figure (Figures~14--16 and 18), whereas the paper streams all 494,020 and 581,012 records. The benchmark supports the full streams, but they would take tens of hours. Figure~18 additionally keeps its earlier setting (running z-score, $q=0.02$ / $0.15$, unscaled synthetic streams). Real-stream numbers are therefore not comparable with the paper's.
+  \item \textbf{KDD CUP'99 and Forest CoverType are sampled.} Every figure uses the first 10,000 records of each stream, whereas the paper streams all 494,020 and 581,012 records. The benchmark supports the full streams, but they would take tens of hours. Real-stream numbers are therefore not comparable with the paper's.
+  \item \textbf{All figures now share one set of inputs}, Figure~18 included, so the comparison against the baselines uses the same streams as Figures~14--16.
+  \item \textbf{The meaning of $C$ is ambiguous}, so the whole study was run twice: once with $C$ read literally as the box of Eq.~(5), once with $C$ read as a bounded-support-vector fraction (Section~\ref{subsec:svstream_c_reading}). Unless stated otherwise, the figures below are from the literal run.
 \end{itemize}
 
 \begin{table}[!ht]
@@ -25,14 +27,14 @@ We reproduced the experimental study of SVStream~\cite{wang2013svstream} (Figure
 \toprule
 \textbf{Input} & \textbf{Paper} & \textbf{This run} & \textbf{Same?} \\
 \midrule
-Parameters and grids & Table~1 ($M$, $q$, $C$); $\delta=0.6$, $\eta=1$, $\zeta=2$; sweep grids of Figs.~13--17 & Used as given in Figs.~3--17 & Yes \\
-Synthetic streams & Not released; figures without axes & Stated properties kept; coordinate scale calibrated once & No \\
-KDD CUP'99 & 494,020 records, 34 attributes, ``one outlier removed'' & First 10,000 records in original order (the removed outlier, index 346,366, lies outside them) & No \\
+Parameters and grids & Table~1 ($M$, $q$, $C$); $\delta=0.6$, $\eta=1$, $\zeta=2$; sweep grids of Figs.~13--17 & Used as given in Figs.~3--18 & Yes \\
+Synthetic streams & Not released; figures without axes & Stated properties kept; coordinate scale calibrated once ($\times 0.943$ and $\times 2.13$) & No \\
+KDD CUP'99 & 494,020 records, 34 attributes, one outlier removed & First 10,000 records in original order (the paper does not say which outlier it removed; our guess, the record with the largest z-score norm at index 346,366, lies outside them) & No \\
 Forest CoverType & 581,012 records, 10 attributes & First 10,000 records in original order & No \\
-Normalisation & Not stated & Calibrated once: KDD online z-score, CoverType min-max & No \\
+Normalisation & Not stated & Calibrated once: KDD online z-score, CoverType min-max, then each stream rescaled so that $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2 = 1$ on the first chunk & No \\
+Reading of $C$ & Eq.~(5) box $\beta_i \le C$; values $0.2$--$0.34$ & Both readings run in full: literal box (main), and $C$ as a BSV fraction, box $= 1/(CM)$ & Both \\
 Figure~13 grid & $C \in [0.26, 0.34]$ & 13a: the paper's grid; 13b: $C \in [0.010, 0.022]$, where the box binds & 13a only \\
-Figure~18 & Full streams, paper's $q$ & 10,000 records, online z-score, $q=0.02$ / $0.15$, unscaled synthetic streams & No \\
-Baselines, platform & StrAP included; unstated implementation on a Core2 Duo PC; peak memory usage & River baselines without StrAP; Python; model size & No \\
+Baselines, platform & StrAP included; unstated implementation on a Core2 Duo PC; peak memory usage & River baselines without StrAP, at untuned defaults; Python; model size & No \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -44,13 +46,15 @@ Baselines, platform & StrAP included; unstated implementation on a Core2 Duo PC;
 
 \noindent\textbf{Coordinate scale.} A Gaussian kernel of width $q$ on data scaled by $s$ behaves like $q s^2$ on the unscaled data, so a single $q$ sweep on the unscaled stream fixes $s = \sqrt{q^*/q_{\text{paper}}}$. Ring-Ball peaks at $q^*=8$ against the paper's $9$ ($s=0.943$); Smileface-Twomoons peaks at $q^*=50$ against $11$ ($s=2.13$). Because the scale is chosen by maximising the average Rand index at the paper's defaults, the synthetic panels of Figure~15 and the average Rand index of Figures~5--6 and 11--12 are not independent evidence.
 
-\noindent\textbf{Normalisation.} At the paper's own $q$, we compute $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ on the first chunk for each candidate normalisation, since Section~4.4.2 of the paper asks for $q$ slightly larger than $1/\max\|\mathbf{x}_i-\mathbf{x}_j\|^2$, and discard normalisations under which almost every kernel value is $0$ or $1$. On KDD CUP'99 only the online z-score puts this product near one ($0.99$); on CoverType only min-max leaves a usable kernel ($27.6$; with the others more than 99\% of the kernel values are $\approx 0$). The choice uses kernel statistics only, not the Rand index.
+\noindent\textbf{Normalisation.} At the paper's own $q$, we compute $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ on the first chunk for each candidate normalisation, since Section~4.4.2 of the paper asks for $q$ slightly larger than $1/\max\|\mathbf{x}_i-\mathbf{x}_j\|^2$, and discard normalisations under which almost every kernel value is $0$ or $1$. On KDD CUP'99 only the online z-score puts this product near one ($0.99$); on CoverType only min-max leaves a usable kernel (with the others more than 99\% of the kernel values are $\approx 0$), but its product is $27.6$. The choice uses kernel statistics only, not the Rand index.
+
+\noindent\textbf{First-chunk rescaling.} Since min-max alone leaves CoverType far from the rule of Section~4.4.2, each real stream is then scaled by a single factor so that $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ equals exactly $1$ on the first chunk: KDD CUP'99 needs $\times 1.003$, CoverType $\times 0.185$. CoverType now satisfies the paper's own rule, but as Figures~14--16 show it fails the other way: the kernel becomes so wide that a chunk collapses into a single cluster.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{calibration.png}
   \vspace{-14pt}
-  \caption{Calibration. (a, b) Rand index of $q$ sweeps on the unscaled synthetic streams: dashed, the best $q$; dotted, the paper's $q$ under the chosen scale. (c) Share of sampled pairs with an informative kernel value at the paper's $q$ for each normalisation; numbers give $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ on the first chunk, outlined bars the chosen normalisation.}
+  \caption{Calibration. (a, b) Rand index of $q$ sweeps on the unscaled synthetic streams: dashed, the best $q$; dotted, the paper's $q$ under the chosen scale. (c) Share of sampled pairs with an informative kernel value at the paper's $q$ for each normalisation; numbers give $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2$ on the first chunk before the rescaling above, outlined bars the chosen normalisation.}
   \label{fig:svstream_calibration}
 \end{figure}
 
@@ -72,15 +76,15 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
 \midrule
 3 & Two synthetic streams & Re-created, scaled by $0.943$ and $2.13$ & Input \\
 4 & $C=0.25$: 76 SVs, 10 BSVs, classes separated; $C=1$: one cluster & $C=0.25$: 173 SVs, \textbf{0 BSVs}, 8 clusters (chunk RI 0.951); $C=1$: one cluster (0.495) & Partly \\
-5--6 & Avg.\ RI 0.9267; low RI only in chunks 1--2 & Avg.\ RI \textbf{0.9192}$^\dagger$; RI below 0.9 in chunks 1--6 & Yes \\
-7--10 & 53--126 SVs+BSVs, 3--14 BSVs & 138$\to$506 SVs, 0 BSVs; chunk RI 0.96--1.00, the converging eyes merged at step 70 & Partly \\
-11--12 & Avg.\ RI 0.9857; 65/70 chunks $>0.95$ & Avg.\ RI \textbf{0.9844}$^\dagger$; 63/70 chunks $>0.95$ & Yes \\
-13 & Detection 82--99\%, false alarms $<6\%$; both rise as $\zeta$ and $C$ fall and as $q$ rises & 13a: 0\% everywhere. 13b: $\zeta$ and $C$ trends match, $q$ trend reversed; detection mostly 8--34\% & No \\
-14 & RI stable in $M$ except on Ring-Ball; time grows with $M$; $<200$ SVs+BSVs; 12--230\,KB & RI stable; time \emph{falls} with $M$; 110--874 SVs+BSVs; 18--181\,KB & Partly \\
-15 & Best $q=9$ (Ring-Ball), $11$ (Smileface); KDD $\approx 0.66$, CoverType $\approx 0.71$ & Best $q=11$ (0.923) and $12$ (0.986)$^\dagger$; KDD 0.97--1.00; CoverType flat at 0.33 & Partly \\
-16 & Clear optimum in $C$ on the synthetic streams; CoverType best at $C=0.2$ & Flat, or noisy without a trend on Ring-Ball & No \\
-17 & Stable for $\delta \in [0.5, 0.6]$ and $\eta \in [0.9, 1.0]$, lower for small $\delta$ and $\eta$; $(0.6, 1.0)$ chosen & Default at or within 0.002 of the best (Ring-Ball 0.919; Smileface 0.984 vs.\ 0.986); $\eta$ has no effect, no drop for small $\delta$ and $\eta$ & Partly \\
-18 & SVStream best on all streams, smallest memory & Best on Ring-Ball and KDD; behind baselines on unscaled Smileface and on CoverType & Partly \\
+5--6 & Avg.\ RI 0.9267; low RI only in chunks 1--2 & Avg.\ RI \textbf{0.9192}$^\dagger$; RI below 0.9 in chunks 1--6 & Calibrated \\
+7--10 & 53--126 SVs+BSVs, 3--14 BSVs & 138$\to$506 SVs, 0 BSVs, one sphere throughout; chunk RI 0.956--1.000 & Partly \\
+11--12 & Avg.\ RI 0.9857; 65/70 chunks $>0.95$ & Avg.\ RI \textbf{0.9844}$^\dagger$; 63/70 chunks $>0.95$ & Calibrated \\
+13 & Detection 82--99\%, false alarms $<6\%$; both rise as $\zeta$ and $C$ fall and as $q$ rises & 13a: 0\% everywhere. 13b: $\zeta$ and $C$ trends match, $q$ trend reversed; 8--17\% detection below 6\% false alarms & No \\
+14 & RI stable in $M$; time grows with $M$; $<200$ SVs+BSVs; 12--230\,KB & RI stable; time \emph{falls} with $M$ (explained by the profile below); 13--516 SVs; 4.7--70.6\,KB & Partly \\
+15 & Best $q=9$ (Ring-Ball), $11$ (Smileface); KDD 0.666, CoverType 0.705 & Best $q=11$ (0.923) and $12$ (0.986)$^\dagger$; KDD 0.968--0.996, falling with $q$; CoverType flat at 0.327 & Partly \\
+16 & Clear optimum in $C$ on the synthetic streams; CoverType best at $C=0.2$ & No optimum anywhere: Ring-Ball 0.891--0.929 without a trend, the other three flat & No \\
+17 & Stable for $\delta \in [0.5, 0.6]$ and $\eta \in [0.9, 1.0]$, lower for small $\delta$ and $\eta$; $(0.6, 1.0)$ chosen & Default is the best cell on Ring-Ball (0.919) and within 0.002 on Smileface (0.984 vs.\ 0.986); $\eta$ has no effect at all & Partly \\
+18 & SVStream best on all streams, smallest memory & Best on Ring-Ball, Smileface and KDD, and smallest model on all four, against untuned baselines; behind RepStream on CoverType & Partly \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -99,10 +103,10 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
     \caption{This run}
   \end{subfigure}
   \vspace{-6pt}
-  \caption{Figure~4, Ring-Ball at step 11 with $C=0.25$ and $C=1$ (this run adds $q=1$, $C=0.04$).}
+  \caption{Figure~4, Ring-Ball at step 11 with the paper's settings $C=0.25$ and $C=1$ ($q=9$), plus a third, non-paper setting $q=1$, $C=0.04$ that shows the box binding.}
   \label{fig:comp_fig4}
 \end{figure}
-\noindent\textbf{Analysis.} Only the failure at $C=1$ reproduces: the two classes merge into one cluster as in the paper. At the paper's $C=0.25$ we get no BSV at all (173 SVs, 8 clusters), although the chunk is still clustered well (RI 0.951). The reason is the box constraint of Eq.~(5): with $\sum_i \beta_i = 1$ and $\beta_i \le C$, a sphere holds at most $\lfloor 1/C \rfloor$ BSVs, i.e.\ 4 at $C=0.25$, yet the paper shows 10 BSVs here and 14 at $C=0.3$ (Figure~8). Its $C$ is therefore probably scaled differently. Implemented literally, the box only binds once $C$ is lowered, e.g.\ to $0.04$ (12 BSVs).
+\noindent\textbf{Analysis.} Only the failure at $C=1$ reproduces: the two classes merge into one cluster as in the paper. At the paper's $C=0.25$ we get no BSV at all (173 SVs, 8 clusters), although the chunk is still clustered well (RI 0.951). A point becomes a BSV only when its weight reaches the box, and since $\sum_i \beta_i = 1$, the box binds only if the unconstrained solution would put more than $C$ of the total weight on a single point. At the paper's $q=9$ the sphere rests on 173 support vectors, a mean weight of about $0.006$ against a box of $0.25$, so the constraint is never active; the paper nevertheless reports 10 BSVs here and 14 at $C=0.3$ (Figure~8). Only a much smaller box makes the mechanism engage: the extra panel ($q=1$, $C=0.04$, a demonstration rather than a paper setting, since $q$ also differs) keeps 17 SVs and produces 12 BSVs. Reading the paper's $C$ as a BSV fraction~\cite{benhur2001svc} does not change this either (Section~\ref{subsec:svstream_c_reading}).
 
 %--- Figures 5-6 ---
 \begin{figure}[H]
@@ -118,10 +122,10 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
     \caption{This run}
   \end{subfigure}
   \vspace{-6pt}
-  \caption{Figures~5--6, Rand index per chunk on Ring-Ball and the worst chunks.}
+  \caption{Figures~5--6, Rand index per chunk on Ring-Ball and the two worst chunks, coloured with the model at their own step.}
   \label{fig:comp_fig5_6}
 \end{figure}
-\noindent\textbf{Analysis.} The average Rand index is close to the paper's (0.919 vs.\ 0.927), but it is the value the scale was calibrated on. The early chunks are poor in both, which the paper attributes to the sparse first chunks leaving gaps within the clusters; ours stay below 0.9 for six chunks instead of two. The two chunk panels are coloured with the model at the end of the stream, not at their own step, which is why they look correct although these chunks scored 0.71 and 0.70.
+\noindent\textbf{Analysis.} The average Rand index is close to the paper's (0.919 vs.\ 0.927), but it is the value the scale was calibrated on. The early chunks are poor in both runs, which the paper attributes to sparse first chunks leaving gaps inside a cluster; ours stay below 0.9 for six chunks instead of two. The two worst chunks (1 and 2, RI 0.707 and 0.696) show exactly that failure: the ball is recovered as one cluster while the ring is broken into about ten arcs.
 
 %--- Figures 7-10 ---
 \begin{figure}[H]
@@ -140,7 +144,7 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figures~7--10, Smileface-Twomoons at steps 10, 12, 51 and 70: stream so far, spheres, and clustering of the chunk.}
   \label{fig:comp_fig7_10}
 \end{figure}
-\noindent\textbf{Analysis.} The chunk Rand index stays high at every step (0.96--1.00), but the clusterings are not as clean as the paper's: at step 12 the newly emerged moons are still split into several small clusters (0.956), and at step 70 the two converging eyes form one cluster (0.971). The difference is the summary. Since no BSV is created at the paper's $C$ (see Figure~4), BSV decay never removes noise: noise points stay as isolated SVs and the summary grows from 138 to 506 SVs, whereas the paper keeps 53 to 126 SVs+BSVs and deletes the noise as BSVs (Figure~10a).
+\noindent\textbf{Analysis.} The chunk Rand index is high at every step (1.000, 0.956, 1.000, 0.971), and the two structural events of the paper are visible: at step 12 the moons have just emerged and are still split into several small clusters, and at step 70 the two converging eyes have become one cluster. The summary differs. Since no BSV is created at the paper's $C$ (Figure~\ref{fig:comp_fig4}), BSV decay never removes noise: noise points survive as isolated support vectors and the summary grows from 138 to 506 SVs, whereas the paper keeps 53 to 126 SVs+BSVs and deletes the noise as decayed BSVs (Figure~10a). Exactly one sphere exists at every step, which matters for Figure~17.
 
 %--- Figures 11-12 ---
 \begin{figure}[H]
@@ -159,7 +163,7 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figures~11--12, Rand index per chunk on Smileface-Twomoons and the five worst chunks.}
   \label{fig:comp_fig11_12}
 \end{figure}
-\noindent\textbf{Analysis.} This figure now matches the paper: average RI 0.984 vs.\ 0.986 and 63 vs.\ 65 chunks above 0.95. The weakest chunks are chunk 1 (0.87), chunk 7 (0.92) and chunks 65--68 (down to 0.91), where the eyes merge. The average is the calibration target and not independent evidence, but the Rand index stays at 0.98 over every $M$ (Figure~14) and every $C$ (Figure~16), which the calibration did not tune, while the same algorithm on the unscaled stream scores only 0.762 (Figure~18). The earlier gap on this stream therefore came mostly from the data scale, i.e.\ a kernel too wide for our coordinates.
+\noindent\textbf{Analysis.} This figure matches the paper: average RI 0.984 vs.\ 0.986, and 63 vs.\ 65 chunks above 0.95. The weakest chunks are the very first one (0.872), chunk 7 (0.916) and chunks 66--68 (0.909--0.919), where the eyes merge. The average is the calibration target and not independent evidence, but the index also stays at about 0.98 across every $M$ (Figure~\ref{fig:comp_fig14}) and every $C$ (Figure~\ref{fig:comp_fig16}), which the calibration did not tune, whereas the same algorithm on the unscaled stream reaches only 0.762. The gap reported last week on this stream was therefore an artefact of our coordinate scale rather than of the algorithm.
 
 %--- Figure 13 ---
 \begin{figure}[H]
@@ -180,10 +184,10 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
     \caption{13b: $C$ where the box binds}
   \end{subfigure}
   \vspace{-6pt}
-  \caption{Figure~13, outlier detection rate vs.\ false detection rate on Smileface-Twomoons for varying $\zeta$, $C$ and $q$.}
+  \caption{Figure~13, outlier detection rate vs.\ false detection rate on Smileface-Twomoons (238 injected noise points out of 7,000) for varying $\zeta$, $C$ and $q$.}
   \label{fig:comp_fig13}
 \end{figure}
-\noindent\textbf{Analysis.} On the paper's grid (13a) no BSV exists, so no point is ever declared an outlier and every rate is 0\%. With $C$ lowered to where the box binds (13b), a lower $\zeta$ and a lower $C$ raise both rates, as in the paper, but a larger $q$ lowers them, and the detection rate stays at 8--34\% except at the extremes $C=0.010$ and $q=5$ (paper: 82--99\% with under 6\% false alarms). We have not established why the mechanism behaves differently once it does engage.
+\noindent\textbf{Analysis.} On the paper's grid (13a) no BSV exists, so no point is ever declared an outlier and every rate is 0\%. With $C$ lowered to where the box binds (13b), two of the three trends follow the paper: both rates fall as $\zeta$ rises ($\zeta=1$: 14.3\% detection at 8.0\% false alarms; $\zeta=5$: 8.4\% at 0.2\%), and both rise as $C$ falls ($C=0.022$: 10.5\% at 0.3\%; $C=0.010$: 94.1\% at 48.5\%). The $q$ trend is reversed: our detection falls from 79.8\% at $q=5$ to 12.6\% at $q=12$, whereas the paper's rises with $q$. More importantly the trade-off is far worse than the paper's: at a comparable false-alarm level (below 6\%) we detect 8--17\% of the injected noise against the paper's 82--99\%. Section~\ref{subsec:svstream_c_reading} rules out the fraction reading of $C$ as the explanation, which leaves the decay rule itself and the radius ratio used to declare an outlier as the candidates to check.
 
 %--- Figure 14 ---
 \begin{figure}[H]
@@ -202,7 +206,16 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figure~14, average Rand index, execution time, number of SVs and BSVs, and memory versus chunk size $M$.}
   \label{fig:comp_fig14}
 \end{figure}
-\noindent\textbf{Analysis.} As in the paper, the Rand index is stable in $M$, and memory is of the same order (18--181\,KB vs.\ 12--230\,KB) and higher on KDD CUP'99 than on the 2-D streams; we measure the model size, not the paper's peak memory usage. Two panels differ. Runtime falls as $M$ grows, because a smaller $M$ means more QP solves over the same stream, whereas the paper's runtime grows with $M$. The summary exceeds the paper's bound of 200 (503--516 SVs on Smileface-Twomoons, about 870 on CoverType), because without BSVs nothing removes the noise (Figures~7--10).
+\noindent\textbf{Analysis.} As in the paper, the Rand index is stable in $M$ on all four streams, and the model stays small (4.7--70.6\,KB against the paper's 12--230\,KB, measured as model size rather than peak memory usage). Two panels differ. The summary exceeds the paper's bound of 200 on Smileface-Twomoons (502--516 SVs) because without BSVs nothing removes the noise, while on CoverType it collapses to 13--15 SVs, the opposite failure caused by the too-wide kernel (Figure~\ref{fig:comp_fig15}). And runtime \emph{falls} as $M$ grows (Smileface-Twomoons: 1,849\,s at $M=50$ against 294\,s at $M=300$), whereas the paper's grows. The profile below settles why.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{runtime_profile.png}
+  \vspace{-6pt}
+  \caption{Where \texttt{learn\_one} spends its time on Smileface-Twomoons, by chunk size $M$; the line gives the mean number of points in each quadratic program.}
+  \label{fig:svstream_profile}
+\end{figure}
+\noindent\textbf{Analysis.} Cluster labelling, the complete-graph test that assigns the points of a sphere to connected components, takes 99\% of the time (1,865\,s of 1,881\,s at $M=50$), while the quadratic program takes 2.7\,s and the kernel radius 1.6\,s. The inverted trend has the same source: each quadratic program holds 337--384 points on average whatever $M$ is, because the stored summary of about 500 support vectors dominates the $M$ new points. The cost per chunk is therefore nearly independent of $M$, and the total time follows the number of chunks (140 at $M=50$, 23 at $M=300$). The paper's growing curve implies a cost dominated by the new points instead, which is what a bounded summary would give --- exactly what the missing BSV deletion fails to provide here.
 
 %--- Figure 15 ---
 \begin{figure}[H]
@@ -221,7 +234,7 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figure~15, average Rand index versus the kernel width $q$ on the paper's grids.}
   \label{fig:comp_fig15}
 \end{figure}
-\noindent\textbf{Analysis.} The synthetic panels stay close to the paper, partly by calibration: Ring-Ball ranges over 0.85--0.92 (paper 0.85--0.93) but peaks at $q=11$ rather than 9, and Smileface-Twomoons is flat at 0.983--0.986 with its best at $q=12$ (paper 11). The real panels are not comparable. On KDD CUP'99 the index sits at 0.97--1.00 and falls slowly with $q$ (paper $\approx 0.66$), which points to 10,000-record prefix chunks dominated by very few classes rather than to good clustering. On CoverType it is flat at 0.33 with a cluster detection rate of zero, consistent with a single cluster per chunk. A preliminary check outside the figure pipeline, on the first 30,000 records with min-max scaling computed over the whole stream, gave 0.52, so both the stream length and the records the scaling is computed on may matter; only a full-stream run can settle it.
+\noindent\textbf{Analysis.} The synthetic panels stay close to the paper, partly by construction: Ring-Ball ranges over 0.851--0.923 (paper 0.85--0.93) but peaks at $q=11$ rather than 9, and Smileface-Twomoons is flat at 0.9825--0.9858 with its best at $q=12$ (paper 11). The optima miss the paper's by one or two steps because the calibration sweep on the unscaled streams used an integer grid, so $q^*=8$ and $q^*=50$ are themselves approximate. The real panels are not comparable. On KDD CUP'99 the index falls monotonically from 0.996 at $q=0.001$ to 0.968 at $q=0.096$ and sits far above the paper's 0.666, which reflects a 10,000-record prefix dominated by very few classes rather than better clustering. On CoverType it is flat at 0.327 with a cluster detection rate of zero and only 13--15 SVs: after min-max and the first-chunk rescaling the kernel is so wide that each chunk collapses into a single cluster. Last week's run had the opposite problem ($q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2 = 27.6$, a far too narrow kernel) and also missed the paper's 0.705, so on this stream neither end of the scale reproduces the paper.
 
 %--- Figure 16 ---
 \begin{figure}[H]
@@ -240,7 +253,7 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figure~16, average Rand index versus the trade-off parameter $C$ on the paper's grids.}
   \label{fig:comp_fig16}
 \end{figure}
-\noindent\textbf{Analysis.} None of the paper's optima appears (Ring-Ball at $C=0.25$, Smileface-Twomoons at $0.3$, CoverType at $0.2$). Across $C \in [0.1, 0.32]$ the box of Eq.~(5) practically never binds (Figure~4), so $C$ has no systematic effect: Smileface-Twomoons stays at 0.980--0.986, KDD CUP'99 at 0.986--0.987 and CoverType at 0.328, while Ring-Ball fluctuates between 0.89 and 0.93 without a trend.
+\noindent\textbf{Analysis.} None of the paper's optima appears (Ring-Ball at $C=0.25$, Smileface-Twomoons at $0.3$, CoverType at $0.2$). Over $C \in [0.1, 0.32]$ the box of Eq.~(5) never binds (Figure~\ref{fig:comp_fig4}), so $C$ cannot influence the solution: Smileface-Twomoons stays at 0.980--0.986, KDD CUP'99 at 0.985--0.992 and CoverType at 0.327, while Ring-Ball fluctuates between 0.891 and 0.929 without a trend. That fluctuation is not a $C$ effect either: it comes from the early chunks of Figures~5--6, where a small change in the support vectors flips whole arcs of the ring between clusters.
 
 %--- Figure 17 ---
 \begin{figure}[H]
@@ -259,7 +272,16 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
   \caption{Figure~17, average Rand index versus the multisphere thresholds $\delta$ and $\eta$ (this run: the two synthetic streams only).}
   \label{fig:comp_fig17}
 \end{figure}
-\noindent\textbf{Analysis.} As in the paper, the default $(\delta, \eta) = (0.6, 1.0)$ is at or next to the best cell: it is the best on Ring-Ball (0.919) and within 0.002 of the best on Smileface-Twomoons (0.984 vs.\ 0.986 at $\delta=0.4$). The paper's sensitivity does not reproduce, however. Its surfaces drop to about 0.4--0.7 when both $\delta$ and $\eta$ are small, whereas here $\eta$ has no effect at all (every row of each heat map is identical) and $\delta$ moves the Rand index by at most 0.03 (Ring-Ball falls to 0.89 at $\delta = 0.4$--$0.5$). We have not established why the merging threshold is inert. The benchmark only runs the two synthetic streams, so the paper's KDD CUP'99 and CoverType panels are not reproduced.
+\noindent\textbf{Analysis.} As in the paper, the default $(\delta, \eta) = (0.6, 1.0)$ is at or next to the best cell: it is the best on Ring-Ball (0.919) and within 0.002 of the best on Smileface-Twomoons (0.984 against 0.986 at $\delta=0.4$). The paper's sensitivity does not reproduce. Its surfaces fall to about 0.4--0.7 when both thresholds are small, whereas here every row is identical, so $\eta$ has no effect whatsoever, and $\delta$ moves the index by at most 0.03 (Ring-Ball drops to 0.89 at $\delta = 0.4$--$0.5$). The benchmark only runs the two synthetic streams, so the paper's KDD CUP'99 and CoverType panels are not reproduced.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.86\textwidth]{sphere_diagnostics.png}
+  \vspace{-6pt}
+  \caption{Number of spheres after each chunk over the $\delta$ grid of Figure~17, at $\eta = 1$, with the number of spheres created and merged in each run.}
+  \label{fig:svstream_spheres}
+\end{figure}
+\noindent\textbf{Analysis.} This diagnostic explains the inert thresholds: at most one sphere ever exists. Every sphere that $\delta$ creates is merged back within the same chunk (Ring-Ball 1 to 17 creations, Smileface-Twomoons 0 to 49, each with as many merges), so the count never leaves 1. The distance between the two sphere centres at the merging test is only 0.07--0.21 in every run, far below the whole $\eta$ grid $[0.5, 1.0]$, so the merge always succeeds and $\eta$ cannot change anything; $\delta$ only decides how often this create-and-merge cycle runs. In the paper the multisphere model is what carries concept drift, so the next step is to find which condition keeps our spheres from surviving a chunk.
 
 %--- Figure 18 ---
 \begin{figure}[H]
@@ -275,9 +297,25 @@ All figures below were produced with the inputs of Table~\ref{tab:svstream_input
     \caption{This run}
   \end{subfigure}
   \vspace{-6pt}
-  \caption{Figure~18, Rand index, execution time and memory against River baselines, with the unchanged Figure~18 setting (unscaled synthetic streams, 10,000-record real prefixes).}
+  \caption{Figure~18, Rand index, execution time and model memory against River baselines, on the same inputs as Figures~14--16.}
   \label{fig:comp_fig18}
 \end{figure}
-\noindent\textbf{Analysis.} SVStream wins clearly on Ring-Ball (0.918 vs.\ at most 0.60) and leads on KDD CUP'99 (0.982), but trails on Smileface-Twomoons (0.762, behind CluStream, DenStream and STREAMKMeans) and is last on CoverType (0.328). The Smileface-Twomoons result is the unscaled stream this figure keeps; at the calibrated scale SVStream reaches 0.984 (Figures~11--12). SVStream has the smallest memory only on Ring-Ball; DenStream is smaller on the other three streams. The comparison also differs from the paper's through its baselines (River implementations, no StrAP, DenStream's $\varepsilon$ rescaled to the data), the Python implementation, and the memory metric.
+\noindent\textbf{Analysis.} The paper's qualitative claim largely holds in our run as well: SVStream has the best Rand index on three of the four streams (Ring-Ball 0.919 against at most 0.605, Smileface-Twomoons 0.984 against at most 0.862, KDD CUP'99 0.986 against 0.978 for STREAMKMeans) and the smallest model on all four (4.7--69\,KB against 30--1,548\,KB). Two caveats keep this from being strong evidence: the baselines run at untuned River defaults, and on Ring-Ball the paper reports RepStream at 0.86 where we measure 0.60, so our baselines are weaker than the paper's; and the KDD prefix is dominated by very few classes. On CoverType SVStream is behind RepStream (0.327 against 0.366) and far from the paper's 0.705. In runtime SVStream is by far the slowest on Smileface-Twomoons (760\,s against 1.5--69\,s) for the labelling reason of Figure~\ref{fig:svstream_profile}, but faster than RepStream, DenStream and CluStream on KDD CUP'99 (25\,s against 126--176\,s).
 
-\takeaway{Only the input parameters can follow the paper exactly; the synthetic streams can only be re-created and scaled, and the real streams here are 10,000-record samples. With the scale calibrated, Smileface-Twomoons and Ring-Ball come close to the paper's clustering quality, but the BSV mechanism of Eq.~(5) never engages at the paper's $C$, so outlier detection, the $C$ study and the summary size still differ from the paper.}
+%-----------------------------------------------------------------------
+\subsection{A Second Reading of \texorpdfstring{$C$}{C}}
+\label{subsec:svstream_c_reading}
+%-----------------------------------------------------------------------
+
+Because no BSV appears at the paper's $C$, we repeated the entire study under the other common convention: in support vector clustering the box is often set from the intended fraction $p$ of bounded support vectors as $C = 1/(pN)$~\cite{benhur2001svc}. Reading the paper's values that way gives a box of $1/(CM) = 0.04$ at $C=0.25$ and $M=100$, six times tighter than the literal one.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{fig13a_fraction_outlier_detection.png}
+  \vspace{-6pt}
+  \caption{Figure~13 on the paper's grid with $C$ read as a BSV fraction (box $= 1/(CM)$); compare Figure~\ref{fig:comp_fig13}b.}
+  \label{fig:svstream_fig13_fraction}
+\end{figure}
+\noindent\textbf{Analysis.} The tighter box still does not bind at the paper's kernel width: Figure~4 keeps 162 support vectors and no BSV, and outlier detection stays at 0\% on the paper's defaults, reaching 10.5\% only at the edge of the grid ($q=5$). Clustering quality is slightly but consistently lower than under the literal reading (Ring-Ball 0.893 against 0.919, Smileface-Twomoons 0.977 against 0.984, KDD CUP'99 0.977 against 0.986, CoverType identical at 0.327). This reading therefore does not explain Figures~4, 13 and 16: under both interpretations the bounded support vectors, and with them outlier detection, noise deletion and any real dependence on $C$, stay inactive at the paper's settings.
+
+\takeaway{With the coordinate scale calibrated, the clustering results reproduce the paper closely on both synthetic streams (0.919 vs.\ 0.927 and 0.984 vs.\ 0.986), and Figure~18's qualitative claim holds. What does not reproduce is the bounded-support-vector machinery: under either reading of $C$ no BSV is created at the paper's settings, which explains in turn the missing outlier detection (Figure~13), the unbounded summary and the inverted runtime trend (Figure~14) and the absent dependence on $C$ (Figure~16). The multisphere model never keeps more than one sphere, which leaves $\eta$ inert (Figure~17).}

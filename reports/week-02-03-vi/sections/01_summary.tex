@@ -3,29 +3,30 @@
 %=======================================================================
 \begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
                     itemsep=4pt,topsep=2pt]
-  \item[Mục tiêu -] Thiết lập framework chạy pipeline River, cài đặt bộ metrics đánh giá phân cụm luồng, triển khai nhóm thuật toán nền tảng, và xây dựng phương pháp luận tinh chỉnh siêu tham số benchmark khách quan.
-  \item[Trạng thái -] \Done\ \textbf{Vượt tiến độ}
+  \item[Mục tiêu -] Cài đặt River và thiết lập môi trường thực nghiệm, chạy các kiểm thử xác thực, triển khai các thuật toán nền tảng, xây dựng khung làm việc tùy biến để benchmark và đánh giá các thuật toán phân cụm luồng. Khung làm việc kết hợp đầy đủ các metrics nội tại/ngoại vi cần thiết cho việc đánh giá toàn diện và xây dựng phương pháp luận benchmark siêu tham số khách quan.
+  \item[Trạng thái -] \WIP\ \textbf{Tiến độ viết mã đi trước kế hoạch; công tác kiểm chứng (verify) đối chiếu với bài báo gốc đang được tiến hành}
 \end{description}
 
-\subsection*{Bảng Theo dõi Tiến độ (Kế hoạch Proposal vs. Thực tế triển khai)}
+\subsection*{Bảng Theo dõi Tiến độ}
 
 \begin{table}[H]
 \centering
-\caption{So sánh kế hoạch đề ra trong Proposal và kết quả thực tế (Tuần 2 \& 3).}
-\label{tab:tracker_vi}
-\small
-\begin{tabularx}{\textwidth}{@{}l L L c c@{}}
+\caption{So sánh giữa kế hoạch đề xuất và tiến độ thực tế trong kỳ báo cáo này.}
+\label{tab:tracker}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{2.8cm} L c c@{}}
 \toprule
-\textbf{Giai đoạn / Tuần} & \textbf{Kế hoạch Proposal} & \textbf{Thực tế triển khai (Tuần 2--3)} & \textbf{Trạng thái} & \textbf{Mức hoàn thành} \\
+\textbf{Giai đoạn / Tuần} & \textbf{Mục tiêu Đề xuất} & \textbf{Tiến độ Thực tế} & \textbf{Trạng thái} & \textbf{Mức hoàn thành} \\
 \midrule
-P1.2 (Tuần 2) & Nghiên cứu River \& dựng môi trường dev & Cài đặt River, tìm hiểu và dựng framework chạy pipeline & \Done & \pbar{100} \\
-P2.1 (Tuần 3) & Xây dựng bộ metrics benchmark cốt lõi & Cài đặt đủ 9 metrics (ARI, NMI, AMI, Purity, RI, Silhouette, SSQ, DB, CH) & \Done & \pbar{100} \\
-P3.1 (Tuần 6--7) & Cài đặt nhóm thuật toán đầu tiên (làm sớm) & Implement 10 thuật toán (5 thuật toán nền tảng + 5 thuật toán mở rộng) & \Done & \pbar{100} \\
-Chiến lược & Thống nhất lộ trình triển khai & Ưu tiên thuật toán nền tảng có cơ sở lý thuyết và thí nghiệm chuẩn mực & \Done & \pbar{100} \\
-Phương pháp luận & Thiết kế quy trình benchmark & Nghiên cứu LODO~\cite{cerqueira2026framework} \& đề xuất giải pháp LODO có chủ đích với tham số tương đối~\cite{fan2020hyperparameter} & \Done & \pbar{100} \\
+P1.2 (Tuần 2) & Nghiên cứu các thuật toán River & Đã cài đặt River, thiết lập môi trường, chạy các test kiểm chứng, tìm hiểu framework và pipeline & \Done & \pbar{100} \\
+P2.1 (Tuần 3) & Xây dựng framework benchmark & Đã tích hợp 9 metrics (ARI, NMI, AMI, Purity, RI, Silhouette, SSQ, DB, CH), đăng ký toàn bộ thuật toán; hiện chỉ gồm metrics tĩnh, chưa có metric đo khả năng thích ứng với drift & \WIP & -- \\
+Tuần 4 & Bộ dữ liệu tổng hợp có trôi dạt khái niệm (drift) & Chưa bắt đầu; các luồng tổng hợp hiện có mới chỉ tái lập Ring-Ball và Smileface-Twomoons của SVStream & \Planned & -- \\
+P3.1 (Tuần 6--7) & Cài đặt nhóm thuật toán đầu tiên (làm sớm) & Đã viết mã cho 10 thuật toán (5 nền tảng + 5 mở rộng); đã tái hiện một phần SVStream (Mục~\ref{sec:svstream_reproduction}), 9 thuật toán còn lại chưa được đối chiếu kiểm chứng & \WIP & -- \\
+Kế hoạch Chiến lược & Thống nhất lộ trình & Ưu tiên kiểm chứng các thuật toán nền tảng trước & \Done & \pbar{100} \\
+Phương pháp luận & Thiết kế quy trình benchmark & Vận dụng ý tưởng LODO từ benchmark phát hiện trôi dạt dữ liệu~\cite{cerqueira2026framework}; đề xuất phương pháp LODO tham số tương đối (đóng góp của chúng tôi, chưa đánh giá thực nghiệm) & \WIP & -- \\
 \bottomrule
 \end{tabularx}
 \end{table}
-\takeaway{Hạ tầng pipeline và các hàm đánh giá đã hoàn thiện đầy đủ. Tiến độ triển khai thuật toán và phương pháp luận benchmark đang đi trước kế hoạch ban đầu.}
+\takeaway{Hạ tầng pipeline và các chỉ số đánh giá đã sẵn sàng, mã nguồn của cả 10 thuật toán đã được viết xong vượt trước kế hoạch ban đầu. Tuy nhiên, khâu kiểm chứng đối chiếu vẫn đang tiếp diễn: SVStream mới chỉ được tái lập một phần, trong khi các bộ dữ liệu drift và các chỉ số đo tính thích ứng thời gian thực chưa được bắt đầu.}
 
-\noindent\textbf{Tổng thể:} Tuần 2--3/\TotalWeeks{} - vượt tiến độ.
+\noindent\textbf{Tổng thể:} Tuần \WeekNo/\TotalWeeks{}: tiến độ triển khai mã nguồn vượt kế hoạch; công tác kiểm chứng và các mốc liên quan đến concept drift đang chờ thực hiện.

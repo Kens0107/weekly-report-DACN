@@ -1,6 +1,17 @@
 %=======================================================================
 \section{Khó khăn \& Vấn đề Tồn đọng}
+\label{sec:issues}
 %=======================================================================
 
-% [BỎ TRỐNG]
-\noindent\textit{[Không có vấn đề phát sinh trong Tuần 2--3 / Bỏ trống]}
+Quá trình tái hiện thực nghiệm SVStream (Mục~\ref{sec:svstream_reproduction}) đã làm bộc lộ nhiều vấn đề mở. Mỗi vấn đề dưới đây đều cản trở việc khẳng định rằng bản cài đặt hoàn toàn trùng khớp với bài báo gốc.
+
+\begin{enumerate}[label=\textbf{B\arabic*.},leftmargin=2.2em,itemsep=3pt]
+  \item \textbf{Cơ chế BSV không kích hoạt tại mức $C$ của bài báo.} Theo đúng nghĩa đen của Công thức~(5), một hình cầu chỉ có thể chứa tối đa $\lfloor 1/C \rfloor$ BSV, nhưng bài báo lại hiển thị từ 10--14 BSV. Hậu quả là tỷ lệ phát hiện ngoại lai đạt 0\% trên lưới tham số của bài báo, các đường cong biến thiên theo $C$ đi ngang và tập tóm tắt vượt quá giới hạn 200 của bài báo. Tham số $C$ trong bài báo có thể biểu thị tỷ lệ phần trăm BSV, tức là $C_{\text{eff}} = 1/(C \cdot M)$; cách diễn giải này hiện chưa được kiểm nghiệm thực tế.
+  \item \textbf{Khâu phát hiện điểm ngoại lai hành xử khác biệt ngay cả trong vùng ràng buộc hộp phát huy tác dụng.} Với $C \le 0.022$, tỷ lệ phát hiện duy trì ở mức 8--34\% và tác động của $q$ bị đảo ngược. Nguyên nhân cụ thể vẫn chưa được xác định.
+  \item \textbf{Các ngưỡng đa cầu (multisphere) không phát huy tác dụng.} Trong Hình~17, $\eta$ hoàn toàn không có hiệu lực và $\delta$ chỉ làm thay đổi chỉ số Rand tối đa 0.03. Nguyên nhân khả dĩ là hình cầu thứ hai hiếm khi hoặc không bao giờ được tạo ra, dẫn đến việc điều kiện gộp cầu không bao giờ được kích hoạt, tuy nhiên số lượng hình cầu tại mỗi bước hiện chưa được ghi nhận (log).
+  \item \textbf{Hàm nhân trên CoverType vẫn còn quá hẹp.} Phương pháp chuẩn hóa min-max được lựa chọn mang lại $q \cdot \max\|\mathbf{x}_i-\mathbf{x}_j\|^2 = 27.6$ thay vì xấp xỉ 1, và chỉ số Rand bị giữ chặt ở mức 0.33 đối với mọi cấu hình tham số.
+  \item \textbf{Các luồng dữ liệu thực chỉ mới là các mẫu tiền tố 10.000 bản ghi.} Việc chạy toàn bộ luồng tiêu tốn hàng chục giờ, đồng thời đoạn tiền tố của KDD CUP'99 bị chi phối bởi quá ít lớp, khiến chỉ số Rand 0.97--1.00 không mang nhiều thông tin đánh giá thực chất.
+  \item \textbf{Xu hướng thời gian thực thi theo $M$ chưa được lý giải rõ ràng.} Thời gian chạy giảm dần khi $M$ tăng, trái ngược với bài báo; nguyên nhân phỏng đoán (tập tóm tắt đã lưu chiếm ưu thế áp đảo trong mỗi bài toán QP) vẫn chưa được đo đạc phân tích chi tiết (profile).
+  \item \textbf{So sánh với các baseline đối chuẩn chưa thực sự công bằng.} Các baseline ở Hình~18 sử dụng cấu hình mặc định chưa qua tinh chỉnh của River (chỉ co giãn tham số $\varepsilon$ của DenStream, không có StrAP), điều này mâu thuẫn với mục tiêu so sánh công bằng của phương pháp luận được nêu trong Mục~\ref{sec:completed}.
+  \item \textbf{Không thể tái hiện chính xác tuyệt đối các thực nghiệm tổng hợp nếu thiếu dữ liệu gốc từ tác giả.} Ring-Ball và Smileface-Twomoons không bao giờ được công bố công khai, do đó chúng tôi chỉ có thể tái tạo lại dựa trên ước lượng và hiệu chuẩn thang đo.
+\end{enumerate}

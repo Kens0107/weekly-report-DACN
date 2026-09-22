@@ -1,5 +1,6 @@
 %=======================================================================
 \section{Completed Tasks}
+\label{sec:completed}
 %=======================================================================
 
 \begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=2.2em]
@@ -15,32 +16,32 @@
 
   \item \textbf{Stream Clustering Algorithm Implementations and Prioritization Strategy} \hfill{\small(Phase 3)}\\
   \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
-    \item Implemented 10 streaming clustering algorithms:
+    \item Implemented the code of 10 clustering algorithms. The implementations are not yet verified against their papers; SVStream is the first one under verification (Section~\ref{sec:svstream_reproduction}).
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \textbf{Foundational, standard, and widely cited:} DStream, HPStream, Birch, RepStream, SVstream.
-      \item \textbf{Exploratory/other models:} DDStream, MrStream, DCUstream, improved\_Birch, SOStream.
+      \item \textbf{Foundational, standard, and widely cited:} DStream, HPStream, Birch~\cite{zhang1996birch}, RepStream~\cite{luhr2009repstream}, SVstream~\cite{wang2013svstream}. Birch is a one-pass method for large static datasets rather than a stream clustering algorithm; it is kept as the CF-tree baseline that stream methods such as CluStream build on.
+      \item \textbf{Exploratory/other models:} DDStream, MrStream, DCUstream, improved\_Birch~\cite{ismael2014improvedbirch}, SOStream~\cite{isaksson2012sostream}.
     \end{itemize}
-    \item \textbf{Implementation Strategy:} Prioritize foundational algorithms first because they possess rigorous theoretical foundations and solid, reproducible experimental setups in original papers, making them ideal for verification. Conversely, other algorithms often present ambiguous algorithmic formulations and questionable experimental reproducibility.
+    \item \textbf{Implementation Strategy:} Prioritize foundational algorithms because they are widely cited, clearly specified and come with experiments that an implementation can be checked against. Section~\ref{sec:svstream_reproduction} shows that even for these, exact reproduction is limited (unpublished data, figures without axes, parameters defined ambiguously), so each implementation is verified figure by figure before it is counted as done.
   \end{itemize}
 
   \item \textbf{Research on Hyperparameter Benchmarking for Stream Clustering} \hfill{\small(Methodology)}\\
   \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=1pt]
     \item \textbf{Current State \& Challenges:}
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \emph{Overfitting:} Most literature reports hyperparameters manually tuned specifically on the authors' chosen datasets. On different benchmarks, performance drops drastically or exhibits unexpected runtime/RAM spikes.
-      \item \emph{Unfair Comparison:} heuristic parameter choices or tuning on test data creates severe evaluation bias.~\cite{cerqueira2026framework}
+      \item \emph{Overfitting:} Most literature reports hyperparameters manually tuned specifically on the authors' chosen datasets. On different benchmarks, performance drops drastically or exhibits unexpected runtime/RAM spikes. In general machine learning, hyperparameter optimization (HPO) plays a critical role in finding robust configurations~\cite{franceschi2024hyperparameter}.
+      \item \emph{Unfair Comparison:} heuristic parameter choices or tuning on test data create evaluation bias, as shown for concept drift detectors in~\cite{cerqueira2026framework}; we expect the same for clustering.
       \item \emph{Core Objective:} Identify hyperparameter configurations that perform robustly and objectively across diverse datasets, rather than finding a set of parameters that produces best performance on a single dataset.
     \end{itemize}
 
-    \item \textbf{Reference Baseline - Leave-One-Dataset-Out (LODO):}
+    \item \textbf{Borrowed Idea - Leave-One-Dataset-Out (LODO):} proposed in~\cite{cerqueira2026framework} for benchmarking concept drift detectors, not an established protocol for clustering; we adapt it here.
     \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
-      \item \emph{Mechanism:} Use $n-1$ datasets to search for optimal configurations (via random search) and evaluate on the remaining held-out dataset. Keeps tuning independent from test data.~\cite{cerqueira2026framework}
+      \item \emph{Mechanism:} Use $n-1$ datasets to search for optimal configurations (via random search) and evaluate on the remaining held-out dataset. Keeps tuning independent from test data.
       \item \emph{Advantages:} Model-agnostic, evaluates wide parameter spaces, straightforward, reproducible.
       \item \emph{Drawbacks:} High computational cost, enormous search space, reliance on chance rather than domain insight.
-      \item \emph{Fatal Limitation for Clustering:} Standard LODO fails because static absolute parameters (e.g., fixed $\epsilon$) lack consistent geometric meaning across datasets with varying dimensionality, scales, and cluster counts (e.g., KDD99 with 23 clusters vs. Shuttle with 2 clusters). No single static absolute value works universally.
+      \item \emph{Limitation for Clustering (our observation, not from a published source):} Standard LODO fails because static absolute parameters (e.g., fixed $\epsilon$) lack consistent geometric meaning across datasets with varying dimensionality, scales, and cluster counts (e.g., KDD99 with 23 clusters vs. Shuttle with 2 clusters). No single static absolute value works universally.
     \end{itemize}
 
-    \item \textbf{Proposed Solution - Purposeful LODO with Relative Parameters:}
+    \item \textbf{Our Proposal - Purposeful LODO with Relative Parameters} (not yet validated):
     \begin{enumerate}[label=(\alph*),leftmargin=1.4em,itemsep=2pt]
       \item \textbf{Tune Key Parameters Only:} Focus exclusively on 1--2 pivotal parameters (or more depending on algorithm)  cluster structure and granularity, for exammples:
       \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
@@ -57,7 +58,7 @@
         \item $\text{threshold} = c \cdot \sigma$, where $\sigma$ is mean standard deviation across dimensions.
         \item $k$ and $\alpha$ tied to class counts or sample mode estimates.
       \end{itemize}
-      \item \textbf{Core Benefit:} A single scaling coefficient $c$ automatically adapts to data density (larger $\epsilon$ for sparse data, smaller for dense data), eliminating the flaw of enforcing rigid absolute values across heterogeneous datasets.~\cite{fan2020hyperparameter}
+      \item \textbf{Core Benefit:} A single scaling coefficient $c$ automatically adapts to data density (larger $\epsilon$ for sparse data, smaller for dense data), eliminating the flaw of enforcing rigid absolute values across heterogeneous datasets. The idea is related in spirit to data-driven hyperparameter tuning for clustering~\cite{fan2020hyperparameter}, but the relative-parameter LODO itself is our proposal and has not been evaluated yet.
     \end{enumerate}
   \end{itemize}
 \end{enumerate}
