@@ -11,5 +11,27 @@ Even when we pick the best configuration for Covertype using its labels, ARI onl
 \paragraph{The full-length results are still in-sample.}
 The three datasets in Stage B were also used to choose the sets, and we only have two seeds, so the numbers are optimistic. We also have not checked that 50k samples rank configurations the same way full streams do; so far this holds for the five chosen sets, which is too few to be sure. The out-of-sample test and a fidelity check should settle both points.
 
+\paragraph{We chose which parameters to tune by argument, not by measurement.}
+DenStream has six parameters. We tuned $\varepsilon$, $\beta$ and $\mu$ and fixed the other three because the original paper suggests they matter little \cite{cao2006denstream}. We never checked this on our own data. Our Stage A grid does let us check part of it, since it covers every combination of $\varepsilon$, $\beta$ and $\mu$. Table~\ref{tab:importance} splits the ARI variance by parameter.
+
+\begin{table}[H]
+\centering
+\caption{Share of DenStream ARI variance explained by each parameter, 50k samples, seed 1.}
+\label{tab:importance}
+\small
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+\textbf{Dataset} & $\boldsymbol{\varepsilon}$ & $\boldsymbol{\beta}$ & $\boldsymbol{\mu}$ & \textbf{Interaction} \\
+\midrule
+Shuttle   & 90\% & 0\% & 2\%  & 9\%  \\
+INSECTS   & 74\% & 0\% & 3\%  & 23\% \\
+Keystroke & 71\% & 2\% & 11\% & 18\% \\
+KDDCup99  & 18\% & 0\% & 13\% & 64\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two things stand out. First, $\beta$ has almost no effect, so a third of our tuning budget went to a parameter that does not matter. Second, on KDDCup99 most of the variance comes from the interaction: the best $\mu$ changes with $\varepsilon$. P2R assumes the opposite, since it fixes $\mu$ first and picks $\varepsilon$ afterwards. We still know nothing about the three fixed parameters because they were never varied. Covertype is left out because its ARI barely moves.
+
 \paragraph{P2R is expensive.}
 P2R picks a smaller $\varepsilon$ and keeps many more micro-clusters, which makes it about $220\times$ slower than the default on Covertype. Arm 3 is much cheaper but fails on Covertype. We will report both as two options on the quality--cost trade-off, and we would like guidance on how much extra cost is acceptable for a recommended set.

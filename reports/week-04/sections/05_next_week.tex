@@ -11,6 +11,7 @@
   $h=1$ means as good as the best, $h=0$ means no better than the default. A dataset is untunable if $\text{ARI}_{\text{best}} < 0.05$ or $\text{ARI}_{\text{best}} - \text{ARI}_{\text{default}} < 0.02$. These thresholds are our own choice.
   \item \textbf{Select the way we read.} Use headroom instead of raw ARI when choosing sets, and drop untunable datasets from selection. This reuses the existing 50k runs.
   \item \textbf{Fidelity check} \cite{klein2017fabolas}. Rerun the top configurations at full length and compute the Spearman rank correlation with their 50k scores. If it is low, tune on longer streams.
+  \item \textbf{Check which parameters matter before tuning} \cite{hutter2014fanova,vanrijn2018importance}. Try about 100 random settings of all six DenStream parameters on each tuning dataset, then measure how much each parameter, and each pair, changes ARI. Only the parameters that clearly matter go into the grid; the rest stay at their defaults. If $\mu$ and $\varepsilon$ still interact strongly, P2R should pick them together on each dataset instead of fixing $\mu$ in advance.
   \item \textbf{Out-of-sample test.} Run the chosen sets on 6 unseen datasets with 4 seeds, and compare each method with the default using win/tie/loss counts and a Wilcoxon test.
 \end{enumerate}
 
@@ -27,6 +28,7 @@ N1 & Add headroom and win/tie/loss to the report & Table printed for all tuning 
 N2 & Headroom-based selection & New chosen sets computed from existing runs & P2 \\
 N3 & Fidelity check, 50k vs full length & Spearman correlation per dataset & P2 \\
 N4 & Out-of-sample evaluation & Results on 6 unseen datasets with Wilcoxon test & P2 \\
+N5 & Parameter screening for DenStream & Importance of all six parameters on each tunable dataset & P2 \\
 \bottomrule
 \end{tabularx}
 \end{table}
