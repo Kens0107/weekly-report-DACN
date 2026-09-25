@@ -1,0 +1,37 @@
+%=======================================================================
+\section{Executive Summary}
+%=======================================================================
+\begin{description}[font=\bfseries\color{accentdark},style=sameline,leftmargin=0pt,labelindent=0pt,itemindent=0pt,labelwidth=0pt,labelsep=0.4em,
+                    itemsep=4pt,topsep=2pt]
+  \item[Objective -] This week we scored the first HPO pipeline on five seeds, compared it with how stream-clustering papers tune their parameters, and built a revised selector from what we learned.
+  \item[Status -] \WIP\ \textbf{On track} (direction revised)
+\end{description}
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{First direction.} For DenStream, only P2R beats the default on all three full-length datasets, by $0.008$ to $0.073$ ARI. On the two noisiest datasets, seed noise is as large as the gaps between methods, and CluStream uses 87\% of the compute without a usable signal.
+  \item \textbf{Literature.} Absolute parameter values do not carry over between datasets, but relative ones can. Racing spends extra seeds only on candidates still in contention, and headroom thresholds must follow the measured noise.
+  \item \textbf{Revised direction.} We now select by headroom, race the grid with irace, and sweep $\lambda$ in place of $\beta$. These changes pass a smoke test, and the full 50k run is planned for next week.
+\end{itemize}
+
+\subsection*{Progress tracker}
+
+\begin{table}[H]
+\centering
+\caption{Week-4 plan versus reality, week \WeekNo.}
+\label{tab:tracker}
+\small
+\begin{tabularx}{\textwidth}{@{}L c l l@{}}
+\toprule
+\textbf{Weekly plan item} & \textbf{Phase ref.} & \textbf{Status} & \textbf{Completion} \\
+\midrule
+N1--N2: headroom reading and selection & P2 & \Done    & \pbar{100} \\
+N3: fidelity check, 50k vs full length & P2 & \Planned & \pbar{0}   \\
+N4: out-of-sample on 6 unseen datasets (coded) & P2 & \WIP & \pbar{50} \\
+N5: DenStream screening ($\beta$ settled) & P2 & \WIP & \pbar{40} \\
+New: literature review; irace arms & P2 & \Done & \pbar{100} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{The first pipeline is fully measured. Its weakness is the ratio of compute to signal, not a bug.}
+
+\noindent\textbf{Overall:} Week \WeekNo/\TotalWeeks{} - on schedule.

@@ -1,0 +1,14 @@
+%=======================================================================
+\section{Revised Direction: Implementation and Smoke Test}
+\label{sec:apply}
+%=======================================================================
+
+We turned these lessons into four changes, three of which are implemented.
+\begin{enumerate}[label=\textbf{(\alph*)},leftmargin=2em,itemsep=1pt,topsep=2pt]
+  \item \textbf{Headroom selection} (P2). Headroom is now the default score and datasets that fail the gate no longer vote, which leaves CluStream untuned for quality. The report prints each gate beside the noise of Table~\ref{tab:noise}.
+  \item \textbf{Racing} (P1, P2). Three irace arms (raw, relative and P2R) race over the same grid as the grid arms, so only the selector differs. The new code has 38 tests.
+  \item \textbf{$\beta$ pinned at $0.75$, $\lambda \in \{0.25, 1, 2\}$} (P1). In a 20k pilot, $\lambda \ge 1$ gave more ARI and 2--5 times the throughput on INSECTS and Shuttle, but on a single seed.
+  \item \textbf{Noise-based gain gate and frozen thresholds} (P2, P3). This is task N2.
+\end{enumerate}
+
+\noindent A smoke test on DenStream (three datasets, 2{,}000 samples) confirmed the mechanism: the race cut 84 candidates to 17 by the second block. On the grid, nine races needed only 574 new runs for 1{,}782 calls, as 68\% of the results were on disk; a continuous space needed 8{,}078, so we race on the grid.

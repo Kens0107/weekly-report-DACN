@@ -1,0 +1,40 @@
+%=======================================================================
+\needspace{5\baselineskip}
+\section{Lessons from the Literature}
+\label{sec:lit}
+%=======================================================================
+
+Carnein et al.~\cite{carnein2017comparison} tune each algorithm per dataset, offline, with irace on ARI. Mansalis et al.~\cite{mansalis2018evaluation} vary one parameter at a time and read the plots, with one run per setting. confStream~\cite{carnein2020confstream} tunes online with irace-inspired sampling but no racing, and IWFO~\cite{thakral2024iwfo} optimises batch centroids rather than hyperparameters. Four lessons carry over.
+\begin{enumerate}[label=\textbf{L\arabic*.},leftmargin=2em,itemsep=1pt,topsep=2pt]
+  \item \textbf{Relative values transfer better than absolute ones.} Carnein's tuned DBSTREAM radius is $0.02$ on Sensor but $1.95$ on KDDCup99 even on standardised data, while Mansalis's 15--20 micro-clusters per class is relative, like our $c\cdot s(D)$ and $q/k$. We keep the relative grid.
+  \item \textbf{The metric and the ranges are design choices.} Carnein caps micro-clusters because ``the ARI can be artificially improved'' by adding more, and in Mansalis purity and CMM rank the algorithms in opposite orders. Our score and thresholds need an explicit basis (P2).
+  \item \textbf{$\beta$ is a dead parameter.} MOA and River both use it only through the product $\beta\mu$, and pinning it at $0.75$ costs only $0.0004$ ARI of ceiling. We therefore pin it (P1).
+  \item \textbf{Racing suits offline tuning.} confStream leaves it out because it ``makes it difficult to apply irace for streaming applications''. Our tuning is offline, so we race (P1, P2).
+\end{enumerate}
+
+\subsection{Racing and headroom}
+\label{sec:thresholds}
+
+irace~\cite{lopezibanez2016irace} evaluates candidates block by block and, after each block, drops those a statistical test finds worse than the best, so extra seeds go only to survivors. Following its guide~\cite{iraceguide2025}, a block holds one seed over all tunable datasets, and we use the t-test because the default Friedman test ranks within instances and ignores any rescaling of scores~\cite{demsar2006statistical}. The race covers exactly the grid's candidates and minimises $-h$, where
+\[
+  h_m(d) = \frac{\mathrm{ARI}_m(d) - \mathrm{ARI}_{\text{default}}(d)}{\mathrm{ARI}_{\text{best}}(d) - \mathrm{ARI}_{\text{default}}(d)}
+\]
+is the headroom proposed by Probst et al.~\cite{probst2019tunability}: $1$ matches the best grid point and $0$ is no better than the default. It addresses the concern of van Rijn and Hutter~\cite{vanrijn2018importance} that performance scales differ between datasets. Table~\ref{tab:thresholds} lists its three thresholds; the gain gate uses the detectable gain
+$(z_{0.95}+z_{0.80})\,\mathrm{SE} \approx 2.49\,\mathrm{SE}$, with $\mathrm{SE} = \sqrt{(\mathrm{sd}_{\text{best}}^2+\mathrm{sd}_{\text{def}}^2)/n}$.
+
+\begin{table}[H]
+\centering
+\caption{The three thresholds around headroom.}
+\label{tab:thresholds}
+\small
+\begin{tabularx}{\textwidth}{@{}l l c L@{}}
+\toprule
+\textbf{Threshold} & \textbf{Purpose} & \textbf{Now} & \textbf{Basis} \\
+\midrule
+Gain gate & Gain above noise & $0.02$ & Statistical: $\text{gain}/\mathrm{SE} \ge z_{0.95}$ on tuning seeds \\
+Ceiling gate & Gain large enough to matter & $0.05$ & Judgement, fixed before seeing the data~\cite{lakens2018equivalence} \\
+Tie band & Method differs from default & 1 sd & Statistical: $1.645\sqrt{2/n}\,\mathrm{sd} = 1.04\,\mathrm{sd}$ at $n=5$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{Only the ceiling gate is a matter of judgement. Covertype's gain of $0.019$ is statistically real ($z \approx 18$) but has no practical meaning, because class labels need not match the cluster structure~\cite{faerber2010labels}. The inflated ceiling in Table~\ref{tab:noise} is the selection bias described by Cawley and Talbot~\cite{cawley2010overfitting}.}

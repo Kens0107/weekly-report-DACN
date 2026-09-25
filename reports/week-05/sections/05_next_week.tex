@@ -1,0 +1,28 @@
+%=======================================================================
+\section{Next Week's Plan}
+\label{sec:next}
+%=======================================================================
+
+Two decisions from the mentors are needed before the runs start.
+\begin{enumerate}[label=\textbf{D\arabic*.},leftmargin=2.2em,itemsep=1pt,topsep=2pt]
+  \item \textbf{Ceiling gate.} We chose $0.05$ after seeing Covertype. From most to least rigorous, it can be tied to batch $k$-means, made relative to each ceiling, or kept as a dated subjective choice.
+  \item \textbf{Cost limit.} A recommended set needs a limit on how much slower than the default it may run, since P2R gains $0.008$ ARI on Covertype at 250 times the run time.
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Plan for week \number\numexpr\WeekNo+1\relax.}
+\label{tab:next}
+\small
+\begin{tabularx}{\textwidth}{@{}c L L c@{}}
+\toprule
+\textbf{\#} & \textbf{Task} & \textbf{Definition of done (verifiable)} & \textbf{Phase} \\
+\midrule
+N1 & Stage A v3, DenStream, 50k ($\approx 1.7$~h) & irace-vs-grid table, new sets & P2 \\
+N2 & Noise-based gain gate; ceiling gate per D1 & Both recorded and dated before N3 & P2 \\
+N3 & Out-of-sample on 6 unseen datasets, 5 seeds & Win/tie/loss against the default & P2 \\
+N4 & Fidelity check, 50k vs full length & Spearman of top-15 configurations & P2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\takeaway{N3 is the only real test of transfer. If the new sets fail to beat the default on most unseen datasets that pass the gate, we will report that ARI-based tuning does not transfer for River's DenStream on raw data.}

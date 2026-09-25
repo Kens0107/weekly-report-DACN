@@ -1,0 +1,74 @@
+%=======================================================================
+\section{First Direction: Grid Search, One Set per Method}
+\label{sec:first}
+%=======================================================================
+
+\subsection{Pipeline}
+
+Each method ships one set per algorithm and runs it unchanged on every dataset, in these stages:
+\begin{itemize}[leftmargin=1.2em,itemsep=0pt,topsep=2pt]
+  \item \textbf{Grid.} Values come from the original papers, plus a relative grid with $\varepsilon = c\cdot s(D)$ and $q = \text{ratio}\cdot k$.
+  \item \textbf{Stage A.} The whole grid runs on 50k samples of five real datasets with seed~1.
+  \item \textbf{Arm 1.} It picks the set with the best mean ARI over the five datasets.
+  \item \textbf{Arm 2.} It makes the same choice by leave-one-dataset-out (LODO)~\cite{cerqueira2026drift}.
+  \item \textbf{Arm 3.} It repeats Arm~2 on the relative grid.
+  \item \textbf{P2R.} It chooses the shape by LODO and reads the granularity from a label-free curve~\cite{fan2020matr}.
+  \item \textbf{Stage B.} The chosen sets run on full-length KDDCup99, Covertype and INSECTS (seeds 2--6).
+\end{itemize}
+
+\subsection{Results and cost}
+
+\begin{table}[H]
+\centering
+\caption{DenStream, mean of seeds 2--6. Stage~A scores each set on the datasets that chose it (\emph{in-sample}) or on the one left out (\emph{LODO}); Stage~B gives full-length ARI.}
+\label{tab:results}
+\small
+\begin{tabular}{@{}l cc ccc r@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Stage A (50k)}} & \multicolumn{3}{c}{\textbf{Stage B ARI}} & \textbf{Cov.} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}
+\textbf{Method} & In-sample & LODO & KDD & Cov & INS & \textbf{samples/s} \\
+\midrule
+Default       & 0.045 & --    & 0.268 & 0.000 & 0.000 & 72{,}942 \\
+Arm 1 = Arm 2 & 0.090 & 0.045 & 0.244 & 0.000 & 0.000 & 71{,}514 \\
+Arm 3         & 0.115 & 0.080 & \textbf{0.457} & $-0.029$ & 0.026 & 23{,}831 \\
+P2R           & 0.110 & \textbf{0.109} & 0.289 & \textbf{0.008} & \textbf{0.073} & 292 \\
+\midrule
+\multicolumn{7}{@{}l}{\footnotesize For CluStream, no method exceeds $0.009$ in Stage~A or $0.038$ in Stage~B.} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\takeaway{P2R keeps its score on unseen datasets and alone beats the default everywhere, but its gains are small and it runs 250 times longer on Covertype. The zeros on Covertype and INSECTS are degenerate runs: $\varepsilon$ is too small for the data, so no cluster forms.}
+
+\noindent A five-seed round takes 1{,}660 runs, 6.5~hours of wall-clock time and 76.7 CPU-hours. CluStream accounts for 87\% of this cost, although its best ARI on any dataset is only $0.032$.
+
+\subsection{Where it falls short}
+\label{sec:problems}
+
+\paragraph{P1 -- Compute goes where there is no signal.}
+CluStream's ARI never rises above seed noise, since the spread between its configurations is only 2.5 times the noise. Within DenStream, $\beta$ has no measurable effect, so a third of the shape grid was spent without return.
+
+\paragraph{P2 -- Gaps between methods lie inside the noise.}
+Each set is chosen on one seed, yet one KDDCup99 configuration ranges from $0.07$ to $0.41$ ARI across six seeds, while methods differ by $0.05$ to $0.08$. The ceiling, the maximum of 126 noisy runs, is inflated by a similar amount (Table~\ref{tab:noise}), and the week-4 gate values were plain round numbers.
+
+\begin{table}[H]
+\centering
+\caption{DenStream at 50k. Ceiling: best grid point on seed~1. Re-run: that configuration on seeds 2--6. Gain: re-run minus default. Detectable: smallest gain a five-seed test can find (Section~\ref{sec:thresholds}).}
+\label{tab:noise}
+\small
+\begin{tabular}{@{}l c c c c c c@{}}
+\toprule
+\textbf{Dataset} & \textbf{Ceiling} & \textbf{Re-run} & \textbf{Bias} & \textbf{sd} & \textbf{Gain} & \textbf{Detectable} \\
+\midrule
+KDDCup99  & 0.515 & 0.423 & \textbf{0.092} & 0.072 & 0.198 & \textbf{0.080} \\
+Shuttle   & 0.297 & 0.211 & \textbf{0.086} & 0.085 & 0.211 & \textbf{0.094} \\
+Keystroke & 0.166 & 0.147 & 0.019 & 0.009 & 0.147 & 0.010 \\
+INSECTS   & 0.086 & 0.077 & 0.009 & 0.008 & 0.077 & 0.009 \\
+Covertype & 0.018 & 0.019 & $-0.001$ & 0.002 & 0.019 & 0.003 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\takeaway{The detectable gain varies thirtyfold between datasets, so no single ARI threshold suits all of them: $0.02$ is too low for KDDCup99 and Shuttle and too high for Keystroke and INSECTS. Pooled over the four tunable datasets, headroom differences below about $0.14$ are ties.}
+
+\paragraph{P3 -- No method transfers everywhere.}
+P2R's label-free criterion picks the wrong level on Shuttle and loses 94\% of its ceiling there, whereas Arm~3 does well on Shuttle but fails on Covertype. Moreover, all Stage~B datasets were also used for tuning, so nothing is out-of-sample yet.
